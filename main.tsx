@@ -14,10 +14,10 @@ function view(Component: JSX.Element) {
   });
 }
 
-function asset(path: string) {
+async function asset(path: string) {
   const realPath = resolve("./public", path);
   try {
-    return new Response(Deno.readFileSync(realPath), {
+    return new Response(await Deno.readFile(realPath), {
       headers: { "content-type": contentType(extname(realPath)) ?? 'binary/octet-stream' },
     });
   } catch (error) {
