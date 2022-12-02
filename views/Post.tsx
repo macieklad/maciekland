@@ -1,9 +1,9 @@
 import Shell from "./Shell.tsx";
 
-export default function Post() {
+export default function Post({ children }: React.PropsWithChildren) {
   return (
     <Shell>
-      <h1>Post</h1>
+      {children}
     </Shell>
   );
 }
