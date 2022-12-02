@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "std/": "https://deno.land/std@0.161.0/",
+    "react": "https://esm.sh/react@18.2.0",
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react-dom/server": "https://esm.sh/react-dom@18.2.0/server",
+    "@mdx-js/mdx": "https://esm.sh/@mdx-js/mdx@2.1.5",
+    "rutt": "https://deno.land/x/rutt@0.0.14/mod.ts"
+  }
+}
