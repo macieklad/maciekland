@@ -54,6 +54,6 @@ serve(
   router({
     "/": () => view(<Home />),
     "/blog/:slug": async (_req, _ctx, match) => await post(match.slug),
-    "/:asset": (_req, _ctx, match) => asset(match.asset),
+    "/:asset*": (_req, _ctx, match) => asset(match.asset),
   }),
 );
