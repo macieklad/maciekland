@@ -9,13 +9,11 @@ import Post from "./views/Post.tsx";
 import { evaluate } from "./mdx.ts";
 
 async function asset(path: string) {
+  let content: Uint8Array;
   const realPath = resolve("./public", path);
+  
   try {
-    return new Response(await Deno.readFile(realPath), {
-      headers: {
-        "content-type": contentType(extname(realPath)) ?? "binary/octet-stream",
-      },
-    });
+    content = await Deno.readFile(realPath)
   } catch (error) {
     if (error instanceof Deno.errors.NotFound) {
       return new Response("Not found", { status: 404 });
@@ -24,6 +22,16 @@ async function asset(path: string) {
     console.error(error);
     return new Response("Server error", { status: 500 });
   }
+
+  const mime = contentType(extname(realPath)) ?? "binary/octet-stream"
+  const isFont = mime?.startsWith('font')
+
+  return new Response(content, {
+    headers: {
+      "content-type": mime,
+      ...(isFont && { "cache-control": 'public, max-age=31536000, immutable' })
+    },
+  });
 }
 
 async function post(slug: string) {
