@@ -1,5 +1,6 @@
 import Shell from "./Shell.tsx";
 import { Squiggle } from "./Squiggle.tsx";
+import posts from "../posts/database.json" assert { type: "json" };
 
 export default function Home() {
   return (
@@ -13,33 +14,26 @@ export default function Home() {
         </p>
       </div>
       <div className="posts">
-        <div className="post">
-          <p className="post__date">October 10, 2022</p>
-          <h2 className="post__title">Laravel config explained</h2>
-          <p className="post__description">
-            Hello. When something interesting comes to my mind I will sometimes
-            write about it. Day-to-day I focus on web development, but do not
-            expect any particular theme. Enjoy!
-          </p>
-        </div>
-        <div className="post">
-          <p className="post__date">October 10, 2022</p>
-          <h2 className="post__title">Laravel config explained</h2>
-          <p className="post__description">
-            Hello. When something interesting comes to my mind I will sometimes
-            write about it. Day-to-day I focus on web development, but do not
-            expect any particular theme. Enjoy!
-          </p>
-        </div>
-        <div className="post">
-          <p className="post__date">October 10, 2022</p>
-          <h2 className="post__title">Laravel config explained</h2>
-          <p className="post__description">
-            Hello. When something interesting comes to my mind I will sometimes
-            write about it. Day-to-day I focus on web development, but do not
-            expect any particular theme. Enjoy!
-          </p>
-        </div>
+        {posts.map(({ slug, title, description, publishedAt }) => (
+          <div className="post">
+            <p className="post__date">
+              {new Date(publishedAt).toLocaleDateString("en-GB", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+            <h2 className="post__title">
+              <a href={`/blog/${slug}`}>
+                {title}
+              </a>
+            </h2>
+            <p className="post__description">
+              {description}
+            </p>
+          </div>
+        ))}
       </div>
       <Squiggle className="home-squiggle mx-auto" />
     </Shell>

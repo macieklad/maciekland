@@ -136,7 +136,7 @@ a:hover {
 .container {
   max-width: 700px;
   margin: 0 auto;
-  padding: 0 10px;
+  padding: 0 18px;
   display: flex;
   flex-direction: column;
 }
@@ -229,6 +229,17 @@ a:hover {
 .post__description {
   font-size: 22px;
   line-height: 30px;
+}
+
+@media screen and (max-width: 640px) {
+  .post__title {
+    font-size: 30px;
+  }
+  
+  .post__description {
+    font-size: 20px;
+    line-height: 28px;
+  }
 }
 
 .home-squiggle {
