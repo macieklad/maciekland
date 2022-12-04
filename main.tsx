@@ -55,7 +55,7 @@ async function post(slug: string) {
 }
 
 function view(Component: JSX.Element) {
-  return new Response(renderToStaticMarkup(Component), {
+  return new Response(`<!DOCTYPE html>${renderToStaticMarkup(Component)}`, {
     headers: { "content-type": "text/html" },
   });
 }

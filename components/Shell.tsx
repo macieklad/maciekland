@@ -12,9 +12,7 @@ export default function Shell(
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="stylesheet" type="text/css" href="/styles.css" />
-        {head}
-
+        <meta charSet="UTF-8" />
         <title>{title ?? "The land of maciek"}</title>
         <meta
           name="description"
@@ -25,6 +23,8 @@ export default function Shell(
           content={keywords ??
             "Web, Javascript, JS, TS, React, Node, Deno, Rust, Laravel, PHP"}
         />
+        <link rel="stylesheet" type="text/css" href="/styles.css" />
+        {head}
       </head>
       <body>
         <div className="container">
