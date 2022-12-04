@@ -271,6 +271,7 @@
     "https://esm.sh/@mdx-js/mdx@2.1.5": "a871a8604ede479b4205ad6fc087bad4180efe4f331f3438d82c96839fbbe8e6",
     "https://esm.sh/jsonc-parser@3.0.0": "e9599da7cdbc04a90772ae862d706c4c377833555f13c960d59a6639af7535ad",
     "https://esm.sh/react-dom@18.2.0/server": "254dadb754ed6c9e58892a8ac39b3bc049c305df75841f174f51ee9fe44f308b",
+    "https://esm.sh/react@18.2.0": "84aa07282d2f3c843f7d56daeae0be41ceae768391c4418f7358dd64e8fe4eca",
     "https://esm.sh/react@18.2.0/jsx-runtime": "8e5e22ae56773ef989a95772b9b9f6d4e5d7891f2d20875c25e51015df018f7c",
     "https://esm.sh/rehype-highlight@5.0.2": "a2664112b108789467851f5237b0f90e75579cf7c659dd8f1dd337c676be6177",
     "https://esm.sh/rehype-pretty-code@0.5.1": "da512ab5b13e257824059e7315db9b29a641015bf2d1f68bcb9f98bb525f54f9",

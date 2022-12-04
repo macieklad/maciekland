@@ -22,12 +22,23 @@
 
 @font-face {
   font-family: 'Satoshi';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
   src: url('/fonts/Satoshi-Medium.woff2') format('woff2'),
        url('/fonts/Satoshi-Medium.woff') format('woff'),
        url('/fonts/Satoshi-Medium.ttf') format('truetype');
-       font-weight: 500;
-       font-display: swap;
-       font-style: normal;
+}
+
+@font-face {
+  font-family: 'Satoshi Fallback';
+  font-style: normal;
+  font-weight: 500;
+  src: local('Arial');
+  ascent-override: 102.23%;
+  descent-override: 24.29%;
+  line-gap-override: 10.12%;
+  size-adjust: 98.80%;
 }
 
 @font-face {
@@ -51,21 +62,177 @@
   size-adjust: 105.35%;
 }
 
+html {
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body, h1, h2, h3, h4, h5, h6, p, ol, ul {
+  margin: 0;
+  padding: 0;
+  color: var(--text-primary);
+}
+
+ol, ul {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 :root {
   --text-primary: rgba(0,0,0, .81);
   --text-secondary: rgba(0,0,0, .75);
   --text-accent: rgba(227, 101, 31);
 
+  --bp-sm: 640px;
+  --bp-md: 1024px;
+  --bp-lg: 1200px;
+
 	font-family: 'Satoshi', 'Satoshi Fallback';
+  font-size: 18px;
+}
+
+@media screen and (max-width: 480px) {
+  :root {
+    font-size: 16px;
+  }  
+}
+
+.mx-auto {
+  margin: 0 auto;
 }
 
 body { 
 }
 
-
 /** Code highlighting */
 pre {
   overflow-x: auto;
+}
+
+nav {
+  padding-top: 32px;
+  display: flex;
+  justify-content: space-between
+}
+
+a {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--text-accent);
+  text-decoration: none;
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav {
+
+}
+
+.nav__logo {
+  width: 115px;
+  height: 85px;
+}
+
+@media screen and (max-width: 640px) {
+  .nav__logo {
+    width: 100px;
+    height: 75px;
+  }  
+}
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-weight: bold;
+}
+
+.intro {
+  margin-top: 104px;
+}
+
+.intro__title {
+  font-size: 44px;
+  line-height: 52px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.intro__description {
+  font-size: 24px;
+  line-height: 33px;
+  color: var(--text-secondary);
+}
+
+@media screen and (max-width: 640px) {
+  .intro {
+    margin-top: 72px;
+  }
+
+  .intro__title {
+    font-size: 44px;
+    line-height: 52px;
+    margin-bottom: 8px;
+  }
+  
+  .intro__description {
+    font-size: 20px;
+    line-height: 30px;
+    color: var(--text-secondary);
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .intro__title {
+    margin-bottom: 12px;
+  }
+}
+
+.posts {
+  margin-top: 72px;
+  margin-bottom: 144px;
+  display: flex;
+  flex-direction: column;
+  gap: 54px;
+}
+
+.post__date {
+  font-size: 16px;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: var(--text-accent);
+}
+
+.post__title {
+  font-size: 32px;
+  line-height: 36px;
+  margin-bottom: 8px;
+}
+
+.post__description {
+  font-size: 22px;
+  line-height: 30px;
+}
+
+.home-squiggle {
+  margin-bottom: 90px;
 }
 
 /**
