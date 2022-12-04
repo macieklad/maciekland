@@ -1,11 +1,30 @@
 export default function Shell(
-  { children, head }: React.PropsWithChildren<{ head?: React.ReactNode }>,
+  { children, title, description, keywords, head }: React.PropsWithChildren<
+    {
+      head?: React.ReactNode;
+      title?: string;
+      description?: string;
+      keywords?: string;
+    }
+  >,
 ) {
   return (
-    <html>
+    <html lang="en">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" type="text/css" href="/styles.css" />
         {head}
+
+        <title>{title ?? "The land of maciek"}</title>
+        <meta
+          name="description"
+          content={description ?? "Where maciek lives"}
+        />
+        <meta
+          name="keywords"
+          content={keywords ??
+            "Web, Javascript, JS, TS, React, Node, Deno, Rust, Laravel, PHP"}
+        />
       </head>
       <body>
         <div className="container">
