@@ -97,6 +97,7 @@ img {
 
 	font-family: 'Satoshi', 'Satoshi Fallback';
   font-size: 18px;
+  color: var(--text-primary);
 }
 
 @media screen and (max-width: 480px) {
@@ -231,6 +232,55 @@ a:hover {
   line-height: 30px;
 }
 
+.prose__header {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 90px;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.prose__title {
+  font-size: 42px;
+  line-height: 1.5;
+}
+
+.prose__description {
+  font-size: 24px;
+  line-height: 1.35;
+  margin-top: 12px;
+  margin-bottom: 54px;
+}
+
+.prose__date {
+  color: var(--text-accent);
+}
+
+.prose h2 {
+  font-size: 32px;
+  margin-bottom: 9px;
+  line-height: 1.18;
+}
+
+.prose p {
+  font-size: 21px;
+  line-height: 1.37;
+  padding-bottom: 21px;
+}
+
+.prose p + h2 {
+  padding-top: 15px;
+}
+
+.prose a {
+  color: var(--text-accent);
+}
+
+.prose__squiggle {
+  margin: 72px auto 90px;
+}
+
+
 @media screen and (max-width: 640px) {
   .post__title {
     font-size: 30px;
@@ -321,7 +371,7 @@ pre > code[class*="language-"] {
 /* Code blocks */
 pre[class*="language-"] {
 	padding: 1em;
-	margin: .5em 0;
+	margin: 2em 0;
 	overflow: auto;
 }
 

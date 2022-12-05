@@ -20,14 +20,17 @@ export default function Post(
 
   return (
     <Shell title={title}>
-      <div>
-        {dateHeader(publishedAt!)}
-        {readingTime}
+      <div className="prose__header">
+        <span className="prose__date">{dateHeader(publishedAt!)}</span>
+        <span className="prose__reading-time">{readingTime}</span>
       </div>
-      <h1>{title}</h1>
-      <p>{description}</p>
-      <Content />
-      <Squiggle />
+      <h1 className="prose__title">{title}</h1>
+      <p className="prose__description">{description}</p>
+
+      <div className="prose">
+        <Content />
+      </div>
+      <Squiggle className="prose__squiggle" />
     </Shell>
   );
 }
