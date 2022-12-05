@@ -9,9 +9,9 @@ export default function Home() {
       <div className="intro">
         <h1 className="intro__title">You have landed, hello!</h1>
         <p className="intro__description">
-          I'm Maciej. When something interesting comes to my mind I will
-          sometimes scribble about it. I mostly focus on web development, but do
-          not expect any concrete theme. Enjoy!
+          I'm Maciej. When something interesting comes to my mind I may write
+          about it. I like to scribble in a loose way (concise when needed) with
+          the focus on web and other technical things.
         </p>
       </div>
       <div className="posts">

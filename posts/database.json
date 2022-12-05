@@ -1,16 +1,9 @@
 [
   {
-    "slug": "yada-yada-yada",
-    "title": "Laravel config explained",
-    "description": "I was confused about this, because when I copy-paste my text it's already have some spaces before it.\nNow I try shift+tab in my editor and make indent again and it's work fine right now.\nSpend some hours for this, thank you again!",
-    "publishedAt": "2022-12-03T19:29:35.853Z",
-    "readingTime": "2 min read"
-  },
-  {
-    "slug": "laravel-config-explained",
-    "title": "Laravel config explained easily",
-    "description": "I was confused about this, because when I copy-paste my text it's already have some spaces before it.\nNow I try shift+tab in my editor and make indent again and it's work fine right now.\nSpend some hours for this, thank you again!",
-    "publishedAt": "2022-12-05T22:28:16.565Z",
+    "slug": "the-tale-of-a-simple-blog",
+    "title": "The tale of a simple blog",
+    "description": "I have tried to create this site for a long time. After multiple retries a reachable goal was stated - create the simplest possible blog and start writing. So here it is, pretty basic, isn't it? Not really.",
+    "publishedAt": "2022-12-06T19:29:35.853Z",
     "readingTime": "1 min read"
   }
 ]
