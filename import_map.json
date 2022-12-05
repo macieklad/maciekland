@@ -6,6 +6,8 @@
     "react-dom/server": "https://esm.sh/react-dom@18.2.0/server",
     "@mdx-js/mdx": "https://esm.sh/@mdx-js/mdx@2.1.5",
     "rutt": "https://deno.land/x/rutt@0.0.14/mod.ts",
-    "rehype-prism-plus": "https://esm.sh/rehype-prism-plus@1.5.0"
+    "rehype-prism-plus": "https://esm.sh/rehype-prism-plus@1.5.0",
+    "remark-reading-time": "https://esm.sh/remark-reading-time@2.0.1",
+    "remark-reading-time/": "https://esm.sh/remark-reading-time@2.0.1/"
   }
 }

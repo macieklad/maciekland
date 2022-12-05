@@ -7,6 +7,7 @@ import { router } from "rutt";
 import Home from "./components/Home.tsx";
 import Post from "./components/Post.tsx";
 import { evaluate } from "./mdx.ts";
+import { redirect } from "./utils.ts";
 
 async function asset(path: string) {
   let content: Uint8Array;
@@ -38,11 +39,8 @@ async function asset(path: string) {
 
 async function post(slug: string) {
   try {
-    const { Content, frontMatter } = await evaluate(`./posts/${slug}.mdx`);
     return view(
-      <Post>
-        <Content />
-      </Post>,
+      Post({ post: await evaluate(`./posts/${slug}.mdx`) }),
     );
   } catch (error) {
     if (error instanceof Deno.errors.NotFound) {
@@ -63,6 +61,7 @@ function view(Component: JSX.Element) {
 serve(
   router({
     "/": () => view(<Home />),
+    "/blog": (req) => redirect(req, ""),
     "/blog/:slug": async (_req, _ctx, match) => await post(match.slug),
     "/:asset*": (_req, _ctx, match) => asset(match.asset),
   }),

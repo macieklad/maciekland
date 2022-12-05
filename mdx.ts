@@ -1,6 +1,8 @@
-import { evaluate as mdxEvaluate } from "@mdx-js/mdx";
+import { compile, run } from "@mdx-js/mdx";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import rehypePrism from "rehype-prism-plus";
+import readingTime from "remark-reading-time";
+import readingMdxTime from "remark-reading-time/mdx";
 
 declare module "react/jsx-runtime" {
   const Fragment: unknown;
@@ -9,14 +11,42 @@ declare module "react/jsx-runtime" {
 }
 
 export async function evaluate(mdxFile: string) {
-  const { default: Content, ...frontMatter } = await mdxEvaluate(
+  const file = await compile(
     await Deno.readTextFile(mdxFile),
-    { Fragment, jsx, jsxs, rehypePlugins: [rehypePrism] },
+    {
+      rehypePlugins: [rehypePrism],
+      remarkPlugins: [readingTime, readingMdxTime],
+      outputFormat: "function-body",
+    },
   );
+
+  const { default: Content, ...frontMatter } = await run(file, {
+    Fragment,
+    jsx,
+    jsxs,
+  });
+
+  const readingTimeValues = file.data?.readingTime as {
+    text: string;
+    minutes: number;
+    time: number;
+    words: string;
+  };
 
   return {
     Content,
-    frontMatter,
+    frontMatter: {
+      ...frontMatter,
+      readingTime: readingTimeValues.text,
+    },
+  } as {
+    Content: React.ComponentType;
+    frontMatter: {
+      title?: string;
+      description?: string;
+      publishedAt?: Date;
+      readingTime: string;
+    };
   };
 }
 
@@ -33,12 +63,8 @@ export async function writePostDatabase() {
 
   for (const index of contents.keys()) {
     const postSlug = postFiles[index].slice(0, -4);
-    const frontMatter: {
-      title?: string;
-      description?: string;
-      publishedAt?: Date;
-    } = contents[index].frontMatter;
-    const { title, description, publishedAt } = frontMatter;
+    const frontMatter = contents[index].frontMatter;
+    const { title, description, publishedAt, readingTime } = frontMatter;
 
     if (!title) {
       throw new Error(`Post ${postSlug} does not have title defined`);
@@ -59,6 +85,7 @@ export async function writePostDatabase() {
       title,
       description,
       publishedAt,
+      readingTime,
     });
   }
 

@@ -1,6 +1,7 @@
 import Shell from "./Shell.tsx";
 import { Squiggle } from "./Squiggle.tsx";
 import posts from "../posts/database.json" assert { type: "json" };
+import { dateHeader } from "../utils.ts";
 
 export default function Home() {
   return (
@@ -17,12 +18,7 @@ export default function Home() {
         {posts.map(({ slug, title, description, publishedAt }) => (
           <div className="post">
             <p className="post__date">
-              {new Date(publishedAt).toLocaleDateString("en-GB", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {dateHeader(publishedAt)}
             </p>
             <h2 className="post__title">
               <a href={`/blog/${slug}`}>
