@@ -1,12 +1,193 @@
-export const title = "The tale of a simple blog";
-export const description = `I have tried to create this site for a long time. After multiple retries a reachable goal was stated - create the simplest possible blog and start writing. So here it is, pretty basic, isn't it? Not really.`;
-export const publishedAt = new Date("2022-12-06T19:29:35.853Z");
+export const title = "The tale of a simple blog"; export const description =
+`As we know it, making a personal site takes time. To even start, I gave myself a goal - create the most basic blog and start writing. Pretty simple, huh? Not really.`;
+export const publishedAt = new Date("2022-12-17T19:29:35.853Z");
 
-One
+## Yet another blog
 
-```js {1,3-4} showLineNumbers
-console.log("HELLO");
-console.log("HELLO");
+I feel that every person has a huge pool of things he or she can talk or write
+about. We experience life, with our own twists and turns. After discovering
+something neat, we rarely share it. It is 2022, and it is well known -
+[learning in public](https://www.swyx.io/learn-in-public/) is the way to go. For
+myself, writing gives me time to ponder, clears up my thinking, makes me more
+precise and calm. There is also this feeling of completeness when you sum up a
+topic and polish what you know. This got me to work.
 
-console.log("HELLO");
+## Working it out
+
+The initial goal of keeping things simple was pragmatic - I did not have much
+success with starting a personal website in the past, so making it mostly
+effortless prognosed some chance of success. I wanted to start with next or
+remix, but the classic `npm install` got me thinking - how basic could the tech
+stack really be for a blog? (by the way, this brought back
+[a memory of a wonderful talk by Ryan Dahl](https://www.youtube.com/watch?v=3NR9Spj0DmQ))
+
+And I did not answer that, as you may guess. Time went by, I started diving deep
+and got irritated, the editor was left empty. But what was left was a really fun
+question - how do I deem a stack simple? Or event better, going straight
+downhill, how to define "simple" in the context of programming (I know, this may
+have already been too philosophical).
+
+I probably could rant a long time about calling something "simple". Even more so
+when I'm currently going through "The Mythical Man Month". And you as a reader
+probably do not want to make this an hour-long read. So stopping myself right in
+the tracks again, it went like this - I searched for an answer far and wide,
+considered multiple options, read far too many resources, until finally stopping
+to do the right thing as I should have from the start - to define the game I
+wanted to play, its rules, and a strategy to execute.
+
+The first part was mostly done, I wanted to start writing as soon as possible.
+What lingered was the yearning for it to really be mine. I did not let that go
+away, so the final goal was to develop a personalised blog/personal website as
+fast as possible.
+
+This gave me a sense of direction and context that created the requirements for
+the project:
+
+- If the blog was going to be personalized, I wanted to have full control over
+  it. So no SSG/SSR/ISG shenanigans, just give me my request and I will take
+  care of the response without over-engineering the whole thing.
+- I will use it mainly for writing, so the process should have fast feedback
+  loop, be effortless and extensible. If I have an unusual idea, I want to be
+  able to visualize it as I see fit, deploy it in a minute, then reproduce the
+  process later with a line or two of code.
+
+## Doing the real work
+
+Using my own guidelines the stack emerged by itself. I have chosen deno as a
+runtime, deno deploy as the deployment target, react as the templating engine
+(no client side code though, just rendering on the server), pure css for
+styling, and mdx with plugins to write articles quickly.
+
+With deno, I did not have to set up typescript myself or through frameworks, the
+standard library removed the need for most external libraries, linter and other
+goodies were built in.
+
+Deno is a clear upgrade over node, the only thing stopping it being not so rich
+ecosystem. I did not have to learn any new frameworks, the project logic was
+written in a whooping 3 files, when I have to change some styles, I simply open
+`styles.css` and change what I have to. React gives templating goodies, and does
+not introduce any bundle size or magic as it is simply used for rendering html.
+Mdx is a clear upgrade over writing html, is infinitely tweakable with plugins
+and I can migrate my content to other system whenever I want.
+
+It took a day to glue everything together. I encountered some issues while
+working with mdx and rendering react on the server but that was basically it. I
+won't deny that the task would be much harder if I was just starting my
+programming journey, when you work with raw requests and responses, knowing a
+thing or two about things like cache headers is invaluable and there is a lot of
+thinking about details. Modern frameworks take away that complexity, but this is
+exactly what made the stack worthwhile. I had an occasion to see the state of
+modern web APIs, to refresh my knowledge and see what can be achieved without
+additional abstractions. There is no build step and deployment takes ten seconds
+at most. If I have to add something like analytics I will simply add it to the
+request flow.
+
+Of course there were concerns too. For example, raw pixel values fly left and
+right in the css for the time being, co-locating styles with templates by using
+something like tailwind would be a better experience overall, also, I may have
+used next and have mdx configured right away and the list goes on.
+
+## Getting things straight
+
+I will say what most of us probably want to hear from time to time. Don't
+bullshit yourself and see things as they are. Does the solution solve the
+problem? Yes. Will you have issues with maintaining it? I certainly won't, even
+after a year I will just read the code and catch up as there is no hidden magic.
+Nor is it a time or place to think about the project complexity and design.
+Nobody else will work with me on it, so I don't have to care about that too.
+
+So it is really simple, you may ask? Can you do what has to be done without
+pulling your hair out? Yes? Great! Does the change introduce obstacles that will
+hinder development in the future? No? Wonderful. Is it quickly deployable?
+Probably? [Good enough.](https://www.swyx.io/good-enough) You probably have
+something simple on your hands, beside other things.
+
+This blog fulfils that criteria, so let me consider it simple. It came to be
+with not much time but a lot of care. Hopefully it serves its purpose well, give
+you some material to dig through and inspire you to make your own place on the
+internet.
+
+## P.S. It really can be simple
+
+The main code serving this whole website is shown below. External utils and
+components do not exceed 100 lines, and are mostly static html or some glue code
+for existing libraries. Taking in mind that there is no framework underneath, it
+is pretty crazy how much can be done in a modern way with the standard libraries
+and a bit of code.
+
+If you are curious, the complete code is available
+[publicly on github.](https://github.com/macieklad/maciekland)
+
+```tsx showLineNumbers
+import { renderToStaticMarkup } from "react-dom/server";
+import { serve } from "std/http/server.ts";
+import { extname, resolve } from "std/path/mod.ts";
+import { contentType } from "std/media_types/mod.ts";
+import { router } from "rutt";
+
+import Home from "./components/Home.tsx";
+import Post from "./components/Post.tsx";
+import { evaluate } from "./mdx.ts";
+import { redirect } from "./utils.ts";
+
+async function asset(path: string) {
+  let content: Uint8Array;
+  const realPath = resolve("./public", path);
+
+  try {
+    content = await Deno.readFile(realPath);
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) {
+      return new Response("Not found", { status: 404 });
+    }
+
+    console.error(error);
+    return new Response("Server error", { status: 500 });
+  }
+
+  const mime = contentType(extname(realPath)) ?? "binary/octet-stream";
+  const isLongCacheable = mime?.startsWith("font") ||
+    mime?.startsWith("image") || mime.startsWith("text/css");
+
+  return new Response(content, {
+    headers: {
+      "content-type": mime,
+      ...(isLongCacheable &&
+        { "cache-control": "public, max-age=15552000, immutable" }),
+    },
+  });
+}
+
+async function post(slug: string) {
+  try {
+    return view(
+      Post({ post: await evaluate(`./posts/${slug}.mdx`) }),
+    );
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) {
+      return new Response("Not found", { status: 404 });
+    }
+
+    console.error(error);
+    return new Response("Server error", { status: 500 });
+  }
+}
+
+function view(Component: JSX.Element) {
+  return new Response(
+    `<!DOCTYPE html>${renderToStaticMarkup(Component)}`,
+    {
+        headers: { "content-type": "text/html" },
+    }
+  );
+}
+
+serve(
+  router({
+    "/": () => view(<Home />),
+    "/blog": (req) => redirect(req, ""),
+    "/blog/:slug": async (_req, _ctx, match) => await post(match.slug),
+    "/:asset*": (_req, _ctx, match) => asset(match.asset),
+  }),
+);
 ```

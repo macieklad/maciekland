@@ -8,6 +8,7 @@ import Home from "./components/Home.tsx";
 import Post from "./components/Post.tsx";
 import { evaluate } from "./mdx.ts";
 import { redirect } from "./utils.ts";
+import About from "./components/About.tsx";
 
 async function asset(path: string) {
   let content: Uint8Array;
@@ -61,6 +62,7 @@ function view(Component: JSX.Element) {
 serve(
   router({
     "/": () => view(<Home />),
+    "/about": () => view(<About />),
     "/blog": (req) => redirect(req, ""),
     "/blog/:slug": async (_req, _ctx, match) => await post(match.slug),
     "/:asset*": (_req, _ctx, match) => asset(match.asset),

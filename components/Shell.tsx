@@ -13,10 +13,11 @@ export default function Shell(
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta charSet="UTF-8" />
-        <title>{title ?? "The land of maciek"}</title>
+        <title>{title ?? "The land of Maciek"}</title>
         <meta
           name="description"
-          content={description ?? "Where maciek lives"}
+          content={description ??
+            "Maciej Ładoś blog. Tech in general, loose thoughts from time to time."}
         />
         <meta
           name="keywords"
@@ -39,8 +40,8 @@ export default function Shell(
               <a href="/about">About</a>
             </div>
           </nav>
-          {children}
         </div>
+        {children}
       </body>
     </html>
   );
