@@ -73,46 +73,45 @@ and I can migrate my content to other system whenever I want.
 It took a day to glue everything together. I encountered some issues while
 working with mdx and rendering react on the server but that was basically it. I
 won't deny that the task would be much harder if I was just starting my
-programming journey, when you work with raw requests and responses, knowing a
+programming journey - when you work with raw requests and responses, knowing a
 thing or two about things like cache headers is invaluable and there is a lot of
-thinking about details. Modern frameworks take away that complexity, but this is
-exactly what made the stack worthwhile. I had an occasion to see the state of
+thinking about details. This is not pleasurable when you do not know what really
+happens. Modern frameworks abstract away that complexity, but this is exactly
+what made the stack worthwhile for me. I had an occasion to see the state of
 modern web APIs, to refresh my knowledge and see what can be achieved without
 additional abstractions. There is no build step and deployment takes ten seconds
-at most. If I have to add something like analytics I will simply add it to the
-request flow.
+at most. If I have to add something like analytics I will add it to the request
+flow.
 
 Of course there were concerns too. For example, raw pixel values fly left and
-right in the css for the time being, co-locating styles with templates by using
-something like tailwind would be a better experience overall, also, I may have
-used next and have mdx configured right away and the list goes on.
+right in the css for the time being, there is no consistency there, also, I may
+have used next and have mdx configured right away and the list goes on. But
+should I care about it right now? Nah.
 
 ## Getting things straight
 
 I will say what most of us probably want to hear from time to time. Don't
 bullshit yourself and see things as they are. Does the solution solve the
-problem? Yes. Will you have issues with maintaining it? I certainly won't, even
-after a year I will just read the code and catch up as there is no hidden magic.
-Nor is it a time or place to think about the project complexity and design.
-Nobody else will work with me on it, so I don't have to care about that too.
+problem? Yes. Will you have issues with maintaining it? I certainly won't, year
+later I will just read the code and catch up, there is no hidden magic. Nobody
+else will work with me on it, so I don't have to care about that too.
 
 So it is really simple, you may ask? Can you do what has to be done without
-pulling your hair out? Yes? Great! Does the change introduce obstacles that will
-hinder development in the future? No? Wonderful. Is it quickly deployable?
+pulling your hair out? Yes? Great! Does changing it introduce obstacles that
+will hinder development in the future? No? Wonderful. Is it quickly deployable?
 Probably? [Good enough.](https://www.swyx.io/good-enough) You probably have
-something simple on your hands, beside other things.
+something simple on your hands, all things considered.
 
-This blog fulfils that criteria, so let me consider it simple. It came to be
-with not much time but a lot of care. Hopefully it serves its purpose well, give
-you some material to dig through and inspire you to make your own place on the
-internet.
+This blog fulfils the criteria, so let me consider it simple. It came to be
+without much time but with a lot of care. Hopefully it will serve its purpose
+well.
 
 ## P.S. It really can be simple
 
-The main code serving this whole website is shown below. External utils and
-components do not exceed 100 lines, and are mostly static html or some glue code
-for existing libraries. Taking in mind that there is no framework underneath, it
-is pretty crazy how much can be done in a modern way with the standard libraries
+The main code serving this website is shown below. External utils and components
+do not exceed 100 lines, and are mostly static html or some glue code for
+existing libraries. Taking in mind that there is no framework underneath, it is
+pretty crazy how much can be done in a modern way with the standard libraries
 and a bit of code.
 
 If you are curious, the complete code is available

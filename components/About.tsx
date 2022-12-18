@@ -12,14 +12,17 @@ export default function About() {
             but I enjoy the tech in general - a good talk about new compiler
             optimization, web performance improvement or a way of building a
             tech team goes a long way for me.
-            <br /><br/>
+            <br />
+            <br />
             I also hike, do some volunteering as a scouting instructor, play
             some games or consume books in my free time.
           </p>
           <div className="about__links">
-              <a href="mailto:maciej@lados.dev">Email</a>
-              <a href="https://www.linkedin.com/in/maciej-%C5%82ado%C5%9B-31673a134/">Linkedin</a>
-              <a href="https://github.com/macieklad">Github</a>
+            <a href="mailto:maciej@lados.dev">Email</a>
+            <a href="https://www.linkedin.com/in/maciej-%C5%82ado%C5%9B-31673a134/">
+              Linkedin
+            </a>
+            <a href="https://github.com/macieklad">Github</a>
           </div>
         </div>
       </div>
