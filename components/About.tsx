@@ -7,15 +7,15 @@ export default function About() {
         <div className="intro">
           <h1 className="intro__title">About me</h1>
           <p className="intro__description">
-            I'm a software engineer currently stationed in Cracow. Right now I'm
-            mostly working with the web platform and supporting technologies,
-            but I enjoy the tech in general - a good talk about new compiler
+            I'm a software engineer currently stationed in Cracow. I'm mostly
+            working with the web platform and supporting technologies, but I
+            enjoy the tech in general - a good talk about new compiler
             optimization, web performance improvement or a way of building a
             tech team goes a long way for me.
             <br />
             <br />
-            I also hike, do some volunteering as a scouting instructor, play
-            some games or consume books in my free time.
+            In my free time I hike, do some volunteering as a scouting
+            instructor, play games or consume books.
           </p>
           <div className="about__links">
             <a href="mailto:maciej@lados.dev">Email</a>
