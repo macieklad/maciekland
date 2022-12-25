@@ -25,6 +25,12 @@ export default function Shell(
             "Web, Javascript, JS, TS, React, Node, Deno, Rust, Laravel, PHP"}
         />
         <link rel="stylesheet" type="text/css" href="/styles.css" />
+        <script
+          async
+          defer
+          data-website-id="c3d29a4a-314b-41fe-829a-026efea27ac4"
+          src="https://macieklad-umami.fly.dev/umami.js"
+        />
         {head}
       </head>
       <body>
