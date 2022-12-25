@@ -295,6 +295,10 @@ a:hover {
   line-height: 1.18;
 }
 
+.prose h3 {
+  margin-bottom: 6px;
+}
+
 .prose p {
   font-size: 20px;
   line-height: 1.43;
@@ -330,6 +334,10 @@ a:hover {
 }
 
 .prose * + h2 {
+  padding-top: 15px;
+}
+
+.prose pre + * {
   padding-top: 15px;
 }
 
@@ -450,7 +458,7 @@ pre[class*="language-"] {
   border-radius: 8px;
   width: 800px;
   max-width: calc(100vw - 18px);
-  margin: 2rem auto 1rem auto;
+  margin: 1rem auto;
 }
 
 pre > code[class*="language-"] {

@@ -90,7 +90,7 @@ export async function writePostDatabase() {
   }
 
   database = database
-    .sort((a, b) => a.publishedAt.getTime() - b.publishedAt.getTime());
+    .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
   await Deno.writeTextFile(
     "./posts/database.json",

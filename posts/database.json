@@ -1,5 +1,12 @@
 [
   {
+    "slug": "deploying-umami-to-fly-io",
+    "title": "Deploying umami to fly.io",
+    "description": "How to host your personal google analytics alternative.",
+    "publishedAt": "2022-12-25T22:00:00.000Z",
+    "readingTime": "5 min read"
+  },
+  {
     "slug": "the-tale-of-a-simple-blog",
     "title": "The tale of a simple blog",
     "description": "As we know it, making a personal site takes time. To even start, I gave myself a goal - create the most basic blog and start writing. Pretty simple, huh? Not really.",

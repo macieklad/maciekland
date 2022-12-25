@@ -1,0 +1,127 @@
+export const title = "Deploying umami to fly.io";
+export const description = `How to host your personal google analytics alternative.`;
+export const publishedAt = new Date("2022-12-25T22:00:00.000Z");
+
+## What is umami?
+
+[An open source, privacy-focused alternative to Google Analytics.](https://umami.is) It has nice ui and packs enough features that you can throw away other solutions until your app grows too much.
+
+## Why should I deploy it to fly?
+
+With fly, you can host your umami server and database on the same hosting, for free. Spinning a database there is trivial, and you can connect it to your app easily. The chance is you also use fly for other projects, you will then be able to leverage their networking too in that case (I encourage you to use fly by the way, it is awesome).
+
+## Pros and cons of self-hosting umami
+
+Let's take a quick peek before going through with deployment, it may not be a solution for you. Tldr; if you want to track personal projects, umami is the way to go in my opinion. Do not bloat your projects with Google Analytics or pay for other solutions.
+
+### Pros
+
+- It has a tiny tracking script - 2kB, if you do not need a powerhouse analytics, this is the best bundle to feature ratio.
+- You own your data.
+- You build it from source, so no deprecations or version changes needed if you decide so.
+
+### Cons
+
+- It is not a solution on the level of Fathom or Google Analytics.
+- Your server instance may die under load. Also watch hosting costs, if you reach thousands of views, it will be cheaper to use a paid product.
+
+## Deployment
+
+Umami requires a backing database to store analytics data, if you have one, you can skip first step of the tutorial. This tutorial uses the [fly cli](https://fly.io/docs/flyctl). Make sure it is set up with your account. I'm also using the `fly` command, a symlink to `flyctl` that should be available by default, if not, use the original command instead.
+
+### Setting up a database
+
+We will create a new development instance of postgres on fly. The cli will ask you for an instance type, if you need a production ready setup, feel free to choose a higher tier. Also, in 2022, fly creates new postgres clusters using [fly machines](https://fly.io/docs/machines). This will not affect your deployment, but make sure your cli is updated to not create them in an old way.
+
+To create a new database, run:
+
+```bash
+fly pg create
+```
+
+You will be asked for app name, then for its type. For umami, development instance is great. App name must be unique globally or it will fail, I like prefixing my apps with my account name.
+
+### Creating umami app and attaching database
+
+You can create new app by calling `flyctl launch`, but we do not need that bootstrap process. It will just complicate everything. So first, we will create your umami app:
+
+```bash
+fly apps create your-umami-app-name
+```
+
+This allocates your new app on the fly platform. The case is the same as with database, name must be unique. Now you can attach postgres database to the app. This will provision a new user and database inside the previously created postgres instance. Postgres will be also made visible in the app internal network.
+
+Attaching is done through the following command:
+
+```bash
+fly pg attach --app your-umami-app-name your-pg-app-name
+```
+
+The command returns a database connection string that you can store as env variable inside your umami app. You do anything if you deployed the database to fly, attaching the app to the database creates a `DATABASE_URL` fly secret int the app with the connection string automatically.
+
+If for some reason you need to set that secret anyway, run:
+
+```bash
+# Do not forget to wrap connection string with quotes, or the command will fail
+fly secrets set -a your-umami-app-name DATABASE_URL="connection_string"
+```
+
+### Deploying umami
+
+Everything is almost set up. Navigate into a place where your app configuration file will be located. You can for example clone umami from github and store it there, if you will ever need a custom umami build, you can start from there.
+
+First, save the existing app configuration from fly into a file:
+
+```bash
+fly config save -a your-umami-app-name
+```
+
+This will create a `fly.toml` file in the current directory. Open it, and apply two modifications, change application port to `3000` and add a `[build]` section with umami docker image. You can find the latest version on [ghcr.io](https://github.com/umami-software/umami/pkgs/container/umami).
+
+```toml {12-13,17}
+app = "your-umami-app-name"
+kill_signal = "SIGINT"
+kill_timeout = 5
+processes = []
+
+[env]
+
+[experimental]
+  allowed_public_ports = []
+  auto_rollback = true
+
+[build]
+  image = "ghcr.io/umami-software/umami:postgresql-v1.39.5"
+
+[[services]]
+  http_checks = []
+  internal_port = 3000
+  processes = ["app"]
+  protocol = "tcp"
+  script_checks = []
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+    type = "connections"
+
+  [[services.ports]]
+    force_https = true
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [[services.tcp_checks]]
+    grace_period = "1s"
+    interval = "15s"
+    restart_limit = 0
+    timeout = "2s"
+```
+
+Save the file and run `fly deploy`. The app should apply changes successfully, and after a minute or two, you will be able to use umami at `your-umami-app-name.fly.dev`. The container runs init scripts when it starts. It will run database migrations, creating umami tables and admin account: `admin` with password `umami`.
+
+### Troubleshooting
+
+If you encounter any problems, you can start debugging with `fly logs`, maybe the container pull failed or some migration was not applied. If the error is non-trivial, you get more help at [the troubleshooting page](https://fly.io/docs/getting-started/troubleshooting/), [umami github](https://github.com/umami-software/umami) or [fly forums](https://community.fly.io).
