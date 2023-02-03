@@ -268,7 +268,8 @@ a:hover {
 
 .prose__title {
   font-size: 42px;
-  line-height: 1.5;
+  line-height: 1.2;
+  margin-top: 8px;
 }
 
 @media screen and (max-width: 640px) {
@@ -341,7 +342,7 @@ a:hover {
   padding-top: 15px;
 }
 
-.prose > * > code {
+.prose * > code {
   margin-top: 36px;
   margin-bottom: 36px;
   border-radius: 4px;

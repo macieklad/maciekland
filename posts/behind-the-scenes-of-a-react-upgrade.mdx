@@ -1,0 +1,95 @@
+export const title = "Behind the scenes of a React upgrade";
+export const description = `At work, we have migrated a service from React 17 to 18. I did not see many resources that tell a full story of a such processeses, so let's talk about it.`;
+export const publishedAt = new Date("2023-01-29T22:00:00.000Z");
+
+## What led to the migration
+
+At [AirHelp](https://airhelp.com), our frontends are almost exclusively React-based. It was adopted a few years ago, and the time has come to move to the newest version of the framework. Multiple libraries started to move away from supporting older React versions, so from the maintenance and security perspective the clock started ticking, and the tech debt. Even more importantly, other company services have migrated too, and we have started to see a compatibility drift - internal packages could not support every project without maintaining two branches of the code, one per React version.
+
+## Problems and solutions
+
+As a foreword, let me point out an important thing - the story of any upgrade/refactor/rewrite is different for each project. My team delayed the migration because there were bigger priorities at the time, and we knew that the change will not be easy. Others had this done in a matter of days, we took almost a month in a team of three, albeit not full-time, with earlier research that in some way started as far as half a year ago.
+
+### The single point of failure
+
+Migrating a solution that is the backbone of your project is at least painful (most of the time). To start moving to a newer React in the repository you have to... upgrade React first! And because many packages, tools and much of the code depend on it, there is a large chance that trying to start the project will result in a beautiful nothingness and a console full of errors. This is unavoidable and any discussions about being independent of the framework are a pointless undertaking - right now React is generally used more like a platform or abstraction that we build upon than a swappable library.
+
+This is hard, plain hard. You do not know what is broken, tests do not tell you anything more as they are broken too or may not fire at all. There was a lot of hope with e2e tests and they were a colossal help further into the process because they encode the behaviour of the app with a black-box approach - I will do this and that, and expect that something will happen. But until the app starts, they are useless too. So what to do?
+
+### An attack plan
+
+This was more of a people problem. The dread that comes with the amount of work you have to do with no clear time estimate of when a thing will be finished is a tough pill to swallow. But doing something is better than doing nothing anyway. All we needed was an anchor to focus on, and a batch of work that is workable without our brains going awry.
+
+We had a headstart because my colleague already took his time to identify the problematic parts of the app that had to be refactored for it to even start. A technical meeting followed, where we structured the work in a form of a waterfall - we chose which tasks block others, their scope and how much of the work can be done in parallel. Then we created loose estimates and split each task into smaller parts so it became manageable. What we did not consider is how many people needed to work on the topic, I did not consider that and it was a mistake, but I will return to it later.
+
+After doing that, we saw clearly that making the app render was a crucial thing and we started with that. An important moment for me came when I acknowledged that when something is this broken, you do not sort out the work you will do. The waterfall and planning were used to prepare a vision and create a measurable plan with units of work that gave us direction. But the code was totally unpredictable and many bugs would surely show only after we fixed other things, being adaptable and doing things that increased our confidence in the project was the way to go.
+
+### Stability can be a myth
+
+After some time, we got the app to a point where it was clickable. The next step was to clear most of the errors, and they came mainly from vendor code that was broken. Other things worked more or less, with some optimization problems, but we could make that work later.
+
+With a major version upgrade, most projects provide a migration guide. If the change is in form of "rename this to that" or "you can remove that entirely", this is a perfect story. But in this case, API's changed completely (react-router 5->6, compatibility library did not help), some libraries stopped working altogether as maintainers evaporated, and multiple projects were dropped too as browser capabilities increased and were standardised.
+
+Somehow I feel that these problems are especially visible on the web. We are in a constrained environment that for a long time lived without standardisation, which still gives us enormous flexibility in how we can implement our sites and applications, with a huge and innovative community. Truly, a box of skittles. For me, this is a good thing and we approach a point where things start to cool down a bit (mature solutions stay, are scalable and capable enough for most use-cases), however, there is no denying that solutions are ever-changing and easily disposed of.
+
+To add insult to injury, anyone who was there when React announced changes between versions 17 and 18 remembers how heated the discussion around the topic was and the burden the transition introduced. In our case, it was a good thing overall. Our app was written when there was not much experience with React in the team and both the technology and ecosystem were not as mature yet too. Some parts of the app just stopped working, and they should never have worked before, but earlier versions of the framework permitted that (mostly thanks to race conditions). An old codebase that was a learning battleground has shown its fangs, sometimes fixing problems took a day to replace a single line of code. A horror on one hand, but a true debugging skills level up on the other - pick your poison.
+
+The job was tedious and manual, we started changing things in hundreds of places and rewriting some parts of the code that had to be replaced entirely - those moments were a form of a treat when you could implement something new altogether. After about two weeks, most of the work was done and we could move forward.
+
+Overall I do not think that every migration must look like that. If I was asked what are the things that predict that such a situation will occur, I would probably pick high code coupling and too much customization. Convention over configuration sounds sweet, but it is more of a responsibility problem. We still use webpack through `create-react-app`. With meta-frameworks like next, you do not configure things like rendering, metadata or image optimization. And when an upgrade comes, the responsibility to update those components is shifted away from you too. There is also a backing community that does things in the same way as you do, so solutions to your problems are quickly available to the public.
+
+### When tests fail to test...
+
+At this point, the application was working and there were no visible issues. We ran the tests and got about 80% of them to fail. There was also a lot of useless output in form of warnings, with a long-standing [testing library issue](https://github.com/testing-library/react-testing-library/issues/1051) at the forefront. It was hard work to get them green again, with new packages snapshots failing here and there, some issues were interconnected, the output did not help much and rerunning many tests, albeit performant, racked up the development time quickly.
+
+An incremental approach gave us good results. We identified linked tests and fixed those batches. Snapshots and warnings were ignored until we had everything under control. Unfortunately, in the end, the testing library warnings I mentioned were hard to fix because of our own, not-so-nice code structure, so over 200 files had to be changed by hand. Everything took days, but the progress started to pile up. When the non-snapshot tests were all green, I took the dip into the snapshots themselves.
+
+I will pause here and elaborate because snapshots left me with a bitter experience. Unless you do [everything well](https://kentcdodds.com/blog/effective-snapshot-testing), they are a pain to work with. Throw in a css-in-js solution that generates DOM attributes dynamically to the mix, and things get messy. Inspecting hundreds of snapshots is not fun, and believe it or not - you will not be able to reason about them very well if they are larger than a few lines. They are worthwhile but use them scarcely. Visual diffing in e2e tests with reasonable change deltas (how much do you allow for two screenshots of the same thing to differ) and expectations in form of `element.toExist().contains(...)` are a better and more flexible choice (in my opinion, but this is harder to set up).
+
+We were ready to move to the e2e tests. Let's say that this part went OK'ish. It was a good occasion to revisit some of the older cases. We discovered that some of the tests were not even run so this was a win too. The work was a bit tedious but it increased our knowledge about the application internals that were not moved for some time (I joined not so long ago, so everything seemed a bit new to me).
+
+I have to say, cypress has shown that it is far from ideal when it comes to developer experience. When everything is failing, you would hope for better manual control. If not for the chrome debugger, pausing the tests and gaining control over the browser would be far harder, and there is no simple way to just say - pause here and let me do what I want. Hit save in a bad moment and the tests rerun. Wanna run a single nested test case? You better add that `skip()` calls everywhere. We had a lot of assertions so they were extracted into reusable functions. Good luck inserting `pause()` in the correct moment then where there are tens of assertions inside the calls. It's like riding a wild horse - you get to where you want to go quicker, but boy what a ride it is.
+
+After all the hard work and 3 weeks into the migration, we were ready for pushing the app into the staging environment.
+
+### Code long forgotten
+
+The testing before release was a standard procedure. An additional, manual testing plan was prepared, a team-wide bug hunting was announced, e2e tests were run in a production-like environment. I have to say that the process went well and we caught most of the problems before production. After release, there were maybe 2 or 3 bugs that had to be hotfixed, which I consider a success considering the changing surface that was introduced.
+
+Still, these bugs brought something else into the limelight. They happened because the test did not cover those parts of the app, and even better, in some cases, we did not even know that the application worked like that. There were no resources that would explain that behaviour (besides git history of course), and that has shown how valuable more general internal documentation would be. We got into discussions about past design decisions and had to decide what to do with them. This was probably avoidable, had we had a proper material in place.
+
+After monitoring a new production release, it was time to celebrate (remember to always do after a big win by the way!). The project got future-proof and we got a huge weight off our shoulders.
+
+## Lessons learned
+
+The process itself was interesting, but I think what we learned is far more valuable. This is not some kind of philosophical thought, this migration was one of a kind experience. I will go over my conclusions.
+
+### How many people are enough
+
+Two. This time. When you work on something that changes this quickly, communication is far more valuable than the hands on the topic themselves. Working from the office through most of the project was a huge win. Live pair programming and coordinating fixes helped a lot, the feedback loop was condensed considerably.
+
+I said that we worked in a team of three. We did, but even with a great separation of work, I think it would be more optimal if the third person focused on the product work that was going on in parallel. The waiting time was not insignificant as we blocked each other from time to time, and when someone was working on unlocking the rest of us, a second person could do the mundane tasks like fixing types or warnings. But the secret sauce lies in how we worked this time. There were no pull requests to the feature branch. We simply talked together about what will be pushed and when, and it was savage. With no approval time, improvements shipped like crazy. With a third person on board, it was still possible, but collisions happened, [with the two of us](https://www.youtube.com/watch?v=PJ0u5c9EF1E), this did not occur.
+
+I should really emphasize this. Sometimes, you have to work differently. **And teams can work differently.** Do not fear to go unconventional from time to time. It will work. It will feel good. It will be fresh. But do remember that we did not push to the main branch, so this kind of sheaningans were allowed. If you think this way of working looks somehow familiar to you, [you are probably right](https://basecamp.com/articles/how-we-structure-our-teams).
+
+### Shift the responsibility for upgrade away
+
+I have said that at the beginning of the article. If you are responsible for controlling every tool and abstraction in your codebase, expect to maintain it. This isn't much of a shock, but because we are bad at predicting the future, this will strike you back exactly in a situation like this. If your framework takes care of most of the abstractions, managing upgrades often boils down to bumping package versions and doing a `npm install`. Your libraries change, but your code does not, so let vendors handle the vendor code if possible, do not glue too much configuration by yourself. Too little control has its own bunch of issues, but we tend to fool ourselves that having everything in the palm of our hand is what we truly want. There is also a huge difference between the abstraction level, for example:
+
+- `react-query` (`tanstack-query`) and `swr` are precise libraries that focus on a single thing. If you additionally abstract their usage into custom hooks, they are easily replaceable
+- Going `react` or `vue` is a decision on a whole another level. You go all in. Like it or not, they do multiple things (even if React was advertised as a function of state first) and will require a rewrite if you want to run away from them in most cases (unless someone gives you a look-alike alternative, looking at you Qwik and Solid).
+- `remix` and `next` lie somewhere in between. You are using react in both cases, so besides specific APIs, you can migrate a large portion of the code without changes.
+
+The choice is highly context-dependent. But if there is one thing that I share like some kind of gospel, that would be standard browser APIs. Use them, and you will drastically reduce your headaches. They won't go away (and even if they do, you will probably be retired).
+
+### How to estimate a migration
+
+This will be a strictly personal opinion. I will try to make it look professional by introducing math! Without further ado, the following formula of work estimation seems to work fine for a migration of this kind (a major version change of a core library or platform):
+
+`(predicted_time * (1 + number_of_large_unknowns) + 2 weeks)`
+
+An explanation is due. You think something will take a `predicted_time`, but there are unknowns such as bugs that will show up later, so at least double it if something is expected to show up. If you can identify more unknowns, it is probably worthwhile to triple or even quadruple the time is taken (but maybe let's stop at that to mitigate [the Parkinson's law](https://en.wikipedia.org/wiki/Parkinson%27s_law), at this point, it is a management issue). This is because of the blockers, an unknown probably will block further work until it is resolved. The two weeks are for some slack, testing and release process. Adjust to your taste and the size of the company maybe?
+
+## A final word
+
+My conclusions were mostly based on a sample of one (ok maybe two and a half but I will not delve into that). I have done refactorings of a similar scale in the past but mostly by myself. Everything said and done, you are the engineer that decides what is optimal. Still, I hope that some of the thoughts here proved useful to you :)

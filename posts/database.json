@@ -1,5 +1,12 @@
 [
   {
+    "slug": "behind-the-scenes-of-a-react-upgrade",
+    "title": "Behind the scenes of a React upgrade",
+    "description": "At work, we have migrated a service from React 17 to 18. I did not see many resources that tell a full story of a such processeses, so let's talk about it.",
+    "publishedAt": "2023-01-29T22:00:00.000Z",
+    "readingTime": "14 min read"
+  },
+  {
     "slug": "deploying-umami-to-fly-io",
     "title": "Deploying umami to fly.io",
     "description": "How to host your personal google analytics alternative.",
