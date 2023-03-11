@@ -1,5 +1,12 @@
 [
   {
+    "slug": "lets-talk-about-hiring",
+    "title": "Brainbuzz: Let's talk about hiring",
+    "description": "It's a package deal, and deals are negotiable.",
+    "publishedAt": "2023-03-12T00:00:00.000Z",
+    "readingTime": "2 min read"
+  },
+  {
     "slug": "behind-the-scenes-of-a-react-upgrade",
     "title": "Behind the scenes of a React upgrade",
     "description": "At work, we have migrated a service from React 17 to 18. I did not see many resources that tell a full story of a such processeses, so let's talk about it.",
