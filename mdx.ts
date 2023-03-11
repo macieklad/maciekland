@@ -53,6 +53,7 @@ export async function evaluate(mdxFile: string) {
 export async function writePostDatabase() {
   const postFiles = Array.from(Deno.readDirSync("./posts"))
     .filter((entry) => entry.isFile && entry.name.endsWith("mdx"))
+    .filter((entry) => !entry.name.startsWith("_"))
     .map((entry) => entry.name);
 
   const contents = await Promise.all(
