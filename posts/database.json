@@ -1,7 +1,14 @@
 [
   {
+    "slug": "automatic-releases-with-github-actions",
+    "title": "Automatic releases with Github Actions",
+    "description": "A recipe for a minimal, self-documenting release process, with bonus deployoments. Language agnostic!",
+    "publishedAt": "2023-04-10T00:00:00.000Z",
+    "readingTime": "7 min read"
+  },
+  {
     "slug": "lets-talk-about-hiring",
-    "title": "Brainbuzz: Let's talk about hiring",
+    "title": "Let's talk about hiring",
     "description": "It's a package deal, and deals are negotiable.",
     "publishedAt": "2023-03-12T00:00:00.000Z",
     "readingTime": "2 min read"

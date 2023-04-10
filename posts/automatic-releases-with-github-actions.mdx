@@ -1,0 +1,228 @@
+export const title = "Automatic releases with Github Actions";
+export const description = `A recipe for a minimal, self-documenting release process, with bonus deployoments. Language agnostic!`;
+export const publishedAt = new Date("2023-04-10T00:00:00.000Z");
+
+## You need some CI, but not too much
+
+When you start a project, especially alone, you do not need to configure CI for automated tests, deployments, you name it. What you want is to keep boring things away - clicking or writing the same thing time and time again. Unless the availability of your application is impacting your business or progress, you can go far without any CI. In most cases, speed of iteration by doing things by hand will make up for the lack of automation.
+
+Hosting services have a lot of built-in goodies to speed up deployments and tests. But I always struggled with tools for abstracting the documentation away - namely, tagging and documenting changes, as there are multiple solutions for each language.
+
+So this article will show you how to set up a simple CI pipeline that will automatically tag your releases and generate release notes, no matter the language you are using. As a bonus, we will also make the process composable - you will be able to trigger other workflows after your release is done. And you will be able to do so manually (maybe you will want to rollback a version), or automatically under certain conditions, to not spam your Github Actions with unnecessary runs.
+
+Basically, a perfect release flow for a small project.
+
+## Action for automatic releases
+
+You will need a single action to do all the work. Most of the tasks can be done using API calls, simplified by the `github-script` action, use them if you want, I prefer to use already available ones, even if they are really simple (mainly because I am lazy, but there are other reasons, duh). The action will:
+
+- Generate a changelog based from the commits since the last tag
+- Commit the generated changelog to the repository (this will not trigger another run)
+- Create a new tag from the commits
+- Create a new release by using the generated tag and changelog ouput.
+
+To keep everything similar, commits that affect the changelog will follow the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) spec(commit types can be changed). Versioning is semver based. I will explain each step directly in the code.
+
+```yaml
+name: Create new application release
+
+# We want releases to trigger on pushes to main, and also on manual dispatch,
+# so we can trigger a release manually, mainly for testing or rollbacks.
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      deployed-tag:
+        description: "Deployed tag"
+        required: false
+        default: ""
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # By default, github jobs GITHUB_TOKEN does not have write access
+    # to the repository, nor can it call other actions through the API.
+    # We need to elevate the permissions to create CHANGELOG changes
+    # in the repository, create tags and call other actions.
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Based on the last tag and commits since main branch
+      # (change the branch as needed), this action will determine
+      # the next semver version. If there are no commits since
+      # the last tag, it will warn (by default it fails)
+      # and not create a new tag.
+      - name: Get Next Semver Version
+        id: semver
+        uses: ietf-tools/semver-action@v1
+        with:
+          token: ${{ github.token }}
+          branch: main
+          noVersionBumpBehavior: warn
+
+      # We will use semver action outputs as a conditional,
+      # we can skip the rest of the job if there are no semver
+      # changes since the last tag. Commits that do not have
+      # a type, i.e. "feat:" or "fix:" will be ignored.
+      # Also, less meaningful types like "chore" or "docs"
+      # will be ignored too. This step can be easily changed
+      # from action to direct API call if you want to customize it.
+      - name: Create Tag
+        uses: rickstaa/action-create-tag@v1
+        if: ${{ steps.semver.outputs.next != '' }}
+        with:
+          tag: ${{ steps.semver.outputs.next }}
+          tag_exists_error: false
+          message: "Automatic tag ${{ steps.semver.outputs.next }}"
+
+      # Based on the commits since the last tag, we will
+      # generate a changelog and commit it to the repository.
+      # You can customize commit types that will be ignored.
+      # We use the default excludes, widened with the "release"
+      # type, I wanted to see them at a glance so they are
+      # copied here.
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
+        if: ${{ steps.semver.outputs.next != '' }}
+        with:
+          token: ${{ github.token }}
+          fromTag: ${{ steps.semver.outputs.next }}
+          toTag: ${{ steps.semver.outputs.current }}
+          excludeTypes: "chore,ci,docs,style,test,release"
+
+      # Cleaning up, we will use our newly related
+      # tag to create a release. Changelog output
+      # from the previous action is used as a body.
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        id: release
+        if: ${{ steps.semver.outputs.next != '' }}
+        with:
+          allowUpdates: true
+          draft: false
+          makeLatest: true
+          name: ${{ steps.semver.outputs.next }}
+          tag: ${{ steps.semver.outputs.next }}
+          body: ${{ steps.changelog.outputs.changes }}
+          token: ${{ github.token }}
+
+      # Commit the changelog to the repository. We do it
+      # here to make sure that other actions were successfull.
+      # Also, [skip ci] is a Github Actions specific commit
+      # message, it will prevent the action from triggering
+      # another run, just in case. I won't go into the details
+      # why the action would not trigger anyway.
+      - name: Commit CHANGELOG.md
+        uses: stefanzweifel/git-auto-commit-action@v4
+        if: ${{ steps.semver.outputs.next != '' }}
+        with:
+          branch: main
+          commit_message: "release: changelog for ${{ steps.semver.outputs.next }} [skip ci]"
+          file_pattern: CHANGELOG.md
+
+      # Some cosmetics, apply output using different variables
+      # if the workflow was triggered manually.
+      - name: Set deployed ref output
+        id: deployed-tag
+        run: |
+          if [ "${{ inputs.deployed-tag }}" != "" ]; then
+              echo "name=${{ inputs.deployed-tag }}" >> $GITHUB_OUTPUT
+          else
+              echo "name=${{ steps.semver.outputs.next }}" >> $GITHUB_OUTPUT
+          fi
+
+      # A bonus, you can ignore that. I like to keep deployments
+      # in separate workflows, and to trigger them automatically
+      # when a release is created. We can dispatch another workflows
+      # thanks to the elevated permissions. By doing this manually
+      # you can call different workflows depending on the context,
+      # and do not worry about thinking which "on" event to use.
+      - name: Trigger production deployment
+        uses: actions/github-script@v6
+        if: ${{ steps.deployed-tag.outputs.name != '' }}
+        with:
+          result-encoding: string
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-to-fly.yml',
+              ref: 'main',
+              inputs: {
+                config: 'production',
+                ref: '${{ steps.deployed-tag.outputs.name }}'
+              }
+            });
+
+      # At the end, I want to have some debug information in the job summary.
+      - name: Add action summary
+        run: |
+          echo "❔ Deployment needed? ${{ inputs.deployed-tag != '' }}" >> $GITHUB_STEP_SUMMARY
+          echo "📃 Deployed tag: ${{ inputs.deployed-tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "⏰ Semver version used as base commit for changelog: ${{ steps.semver.outputs.current }}" >> $GITHUB_STEP_SUMMARY
+          echo "⌛ Semver version used as latest commit for changelog: ${{ steps.semver.outputs.next }}" >> $GITHUB_STEP_SUMMARY
+```
+
+Nice and easy, and without language specific packages. I hope you will find it useful.
+
+## Bonus: deployment actions
+
+Some may be interested how the deployment action looks like as I like to keep it controllable. So here it is, I mainly write deployment actions when using `fly.io`,
+other platforms that I use have automatic deployments anyways. In the action you can see that both development and production deployments can be done using the same action,
+I just set a variable that points to a different config file based on the environment.
+
+```yaml
+name: Deploy application to fly.io
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "The branch or tag to deploy"
+        required: true
+        default: "main"
+      config:
+        description: "Environment to deploy to"
+        required: true
+        options: ["production", "development"]
+        default: "production"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+        with:
+          version: 0.0.475
+
+      - name: Set deployed config file
+        id: deployed-config
+        run: |
+          if [ "${{ inputs.config }}" == "production" ]; then
+              echo "file=fly.toml" >> $GITHUB_OUTPUT
+          else
+              echo "file=fly.dev.toml" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy application
+        run: flyctl deploy --config ${{ steps.deployed-config.outputs.file }}
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Add action summary
+        run: |
+          echo "🚀 Deployed ${{ inputs.ref }} to ${{ inputs.config }}" >> $GITHUB_STEP_SUMMARY
+```
