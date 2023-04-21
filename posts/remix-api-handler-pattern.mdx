@@ -1,0 +1,63 @@
+export const title = "Remix api handler pattern";
+export const description = `Remix can serve the niche role of being a backend framework. If you are accustomed to existing backend frameworks, you might want to associate HTTP verbs with single functions, instead of having only "loaders" and "actions". Let's implement that.`;
+export const publishedAt = new Date("2023-04-21T00:00:00.000Z");
+
+You will need a single utility helper. It will still use Remix loaders and actions underneath, but they will be built from a handler configuration object. If a method is not supported, a response with `405` status code will be thrown, as expected.
+
+```ts
+import { ActionFunction, LoaderFunction } from "@remix-run/server-runtime";
+
+interface HandlerArgs {
+  get?: LoaderFunction;
+  post?: ActionFunction;
+  put?: ActionFunction;
+  delete?: ActionFunction;
+  patch?: ActionFunction;
+}
+
+export function handler({ get, post, put, delete: del, patch }: HandlerArgs) {
+  const loader: LoaderFunction = async (...args) => {
+    return (
+      get?.(...args) ?? new Response("Method not allowed", { status: 405 })
+    );
+  };
+
+  const action: LoaderFunction = async (...args) => {
+    const callbacks: Record<string, LoaderFunction | undefined> = {
+      POST: post,
+      PUT: put,
+      DELETE: del,
+      PATCH: patch,
+    };
+
+    if (!callbacks[args[0].request.method]) {
+      return new Response("Method not allowed", { status: 405 });
+    }
+
+    return callbacks[args[0].request.method]?.(...args);
+  };
+
+  return {
+    loader,
+    action,
+  };
+}
+```
+
+With this, inside your route you can use this utility like this:
+
+```tsx
+import { handler } from "~/utils/api";
+
+// If you only use get verb, you can only export the loader.
+export const { loader, action } = handler({
+  get: async () => {
+    return new Response("Your data");
+  },
+  post: () => {
+    return new Response("Action executed");
+  },
+});
+```
+
+With this pattern we can have some nicely looking API routes, without modyfing the way Remix works. What I like about this approach and Remix in general, especially when using node, is that it acts as a adapter, in loaders and actions you are always getting a standard fetch API compliant objects, e.g. `Request` and `Response`, instead of brittle `IncomingMessage` or `ServerResponse`. If needed, you can swap your http server (express, fastify), server runtime (node, bun, deno) or even the whole framework (remix, next), extract the logic, and the code will mostly work.

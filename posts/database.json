@@ -1,5 +1,12 @@
 [
   {
+    "slug": "remix-api-handler-pattern",
+    "title": "Remix api handler pattern",
+    "description": "Remix can serve the niche role of being a backend framework. If you are accustomed to existing backend frameworks, you might want to associate HTTP verbs with single functions, instead of having only \"loaders\" and \"actions\". Let's implement that.",
+    "publishedAt": "2023-04-21T00:00:00.000Z",
+    "readingTime": "2 min read"
+  },
+  {
     "slug": "automatic-releases-with-github-actions",
     "title": "Automatic releases with Github Actions",
     "description": "A recipe for a minimal, self-documenting release process, with bonus deployoments. Language agnostic!",
