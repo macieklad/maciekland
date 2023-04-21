@@ -16,13 +16,10 @@ interface HandlerArgs {
 }
 
 export function handler({ get, post, put, delete: del, patch }: HandlerArgs) {
-  const loader: LoaderFunction = async (...args) => {
-    return (
-      get?.(...args) ?? new Response("Method not allowed", { status: 405 })
-    );
-  };
+  const loader: LoaderFunction = (...args) =>
+    get?.(...args) ?? new Response("Method not allowed", { status: 405 });
 
-  const action: LoaderFunction = async (...args) => {
+  const action: LoaderFunction = (...args) => {
     const callbacks: Record<string, LoaderFunction | undefined> = {
       POST: post,
       PUT: put,
