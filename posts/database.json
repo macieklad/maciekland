@@ -1,5 +1,12 @@
 [
   {
+    "slug": "barebones-http-server-with-vite-adonis-and-fold",
+    "title": "Barebones http server with vite and express",
+    "description": "How to boost your express (or any other old server) with modern tooling and dependency injection support",
+    "publishedAt": "2024-02-15T00:00:00.000Z",
+    "readingTime": "4 min read"
+  },
+  {
     "slug": "remix-api-handler-pattern",
     "title": "Remix api handler pattern",
     "description": "Remix can serve the niche role of being a backend framework. If you are accustomed to existing backend frameworks, you might want to associate HTTP verbs with single functions, instead of having only \"loaders\" and \"actions\". Let's implement that.",

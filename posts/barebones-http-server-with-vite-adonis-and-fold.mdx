@@ -1,0 +1,74 @@
+export const title = "Barebones http server with vite and express";
+export const description = `How to boost your express (or any other old server) with modern tooling and dependency injection support`;
+export const publishedAt = new Date("2024-02-15T00:00:00.000Z");
+
+## An idea
+
+Recently I got to work with an old express project. It was maintainable, but the DX is not something I'm accustomed to in 2024. The event coincided with my recent interest in AdonisJS, especially v6 (basically a laravel for NodeJS), so the felling was even more pronounced.
+
+I wondered, without much effort, could I make better? I especially yearned for one thing - fast reloads. Also, in my project there was an attempt to implement DI, and it worked, but it was not as elegant as I would like. Adonis does this great because it really uses the concept for what it is useful for in JS - making the code more testable and configurable.
+
+There is a really easy path to achieve those things, let me show it to you.
+
+## Vite all the things - a foreword
+
+I'm using Vite in a lot of projects. It saved my ass in many situations. I migrated some old projects from Create React App, from pure webpack, and even use it with remix. The tool is something I'm familiar with, and it integrates really well with older codebases, for reasons I will not expand on here. It has HMR capabilities, so I thought that maybe I will be able to create a solution using Vite.
+
+With version 5.1, it introduced experimental runtime API, making it even easier to use with backend projects as a preprocessor. The API is not ready yet, but knowing that it will support such cases, gives hope that we will be able to evolve any magical ideas shown in this article into mature solutions.
+
+You may wonder - why not go into AdonisJS directly? I would love to, it is plain simply better, but I don't want to rewrite every project for the sake of me having fun. I want improvements, but with low cost if possible.
+
+## The code
+
+You can use [`vavite`](https://github.com/cyco130/vavite) - a wonderful project from Fatih Aygün that lets you develop backend apps with vite. It is really simple, you add a vite plugin, point to your server file, and voila, you got full vite pipeline, with blazing fast server reloads.
+
+```ts
+import { defineConfig } from "vite";
+import { vavite } from "vavite";
+
+export default defineConfig({
+  plugins: [
+    vavite({
+      handlerEntry: "/server.ts",
+      reloadOn: "static-deps-change",
+    }),
+  ],
+});
+```
+
+Now let's talk about DI. To make it worthwhile, you will need reflection. And esbuild does not support legacy decorators. So we will have to tweak this part first. Unfortunately we will have to replace esbuild altoghether (there were some attempts with plugins, but they didn't work out for me). But on the positive note, there is SWC today, and you can use it easily in your project with `vite-plugin-swc-transform` plugin. It is so simple, that if you want to do it yourself, just go and copy the code from the plugin repo directly.
+
+Your final vite config will look like this:
+
+```ts
+import { defineConfig } from "vite";
+import { vavite } from "vavite";
+import swc from "vite-plugin-swc-transform";
+
+export default defineConfig({
+  plugins: [
+    swc({
+      swcOptions: {
+        jsc: {
+          target: "es2022",
+          transform: {
+            legacyDecorator: true,
+            decoratorMetadata: true,
+            useDefineForClassFields: false,
+          },
+        },
+      },
+    }),
+    vavite({
+      handlerEntry: "/server.ts",
+      reloadOn: "static-deps-change",
+    }),
+  ],
+});
+```
+
+From here onward, we can do many cool things, for example create a fully typed `HttpContext` class, which you add fields to inside middleware and instantiate for each http request. With a DI layer, you can create controller classes that will be built and called for each request with the context, making them entirely independent from your server.
+
+I have created a complete working example with `@adonisjs/fold` that you can copy and try yourself, it should be easier than sticking more code listings together - [https://github.com/macieklad/vite-express-di-example](https://github.com/macieklad/vite-express-di-example). You can navigate to the `src/container.ts` and grok the things yourself from there (This is a holiday post, bare with barebones approach ;>). The `WeakMap` approach is inspired by [this article](https://thebigredgeek.medium.com/request-context-with-typescript-and-express-4b5d6d903caa).
+
+Enjoy!
