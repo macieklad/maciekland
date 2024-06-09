@@ -1,5 +1,19 @@
 [
   {
+    "slug": "be-the-source-of-your-technical-decisions",
+    "title": "Be the source of your technical decisions",
+    "description": "Let people be your lenses, not eyes",
+    "publishedAt": "2024-06-09T00:00:00.000Z",
+    "readingTime": "3 min read"
+  },
+  {
+    "slug": "an-introduction-to-auth-at-scale",
+    "title": "Introduction to doing auth at scale",
+    "description": "Explaining blocks comprising modern, web authentication systems of any scale",
+    "publishedAt": "2024-05-24T00:00:00.000Z",
+    "readingTime": "9 min read"
+  },
+  {
     "slug": "barebones-http-server-with-vite-adonis-and-fold",
     "title": "Barebones http server with vite and express",
     "description": "How to boost your express (or any other old server) with modern tooling and dependency injection support",

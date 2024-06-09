@@ -1,0 +1,223 @@
+export const title = "Introduction to doing auth at scale";
+export const description = `Explaining blocks comprising modern, web authentication systems of any scale`;
+export const publishedAt = new Date("2024-05-24T00:00:00.000Z");
+
+## What does auth mean, really?
+
+Where I am working at, we are maintaining our own auth system. I wondered, are we doing it well? I learn daily about sessions, cookies, storing user personal data, oAuth, the list goes on. But did I understand the whole game? What comprises a complete auth system? This post is an overview of what I found. A map of the landscape.
+
+The problem that we are solving is: **in an internet system, how to implement access control to data in such a way that only data owners can use it**. Be mindful that I have simplified it.
+
+Who is a data owner? You start with people, but it quickly expands into more entities (services, devices, etc.).
+
+What do we protect? Again, rows in database, API calls, you name it.
+
+What does your infrastructure look like? Protocols and physical hardware matter.
+
+Going into infra was out of scope for me, and as I said, we will talk only about web systems. Anyway, you are probably familiar with the following terms:
+
+> **AuthenticatioN (AuthN)** - is the process of verifying that an individual, entity, or website is who or what it claims to be
+
+> **AuthoriZation (AuthZ)** - the process of verifying that a requested action or service is approved for a specific entity
+
+In this article, we hope that doing authn and authz right solves the stated problem.
+
+### Resources
+
+I have taken most of my knowledge from those places:
+
+- [https://cheatsheetseries.owasp.org/index.html](https://cheatsheetseries.owasp.org/index.html)
+- [https://thecopenhagenbook.com/](https://thecopenhagenbook.com)
+- [https://12factor.net](https://12factor.net)
+- [https://auth0.com/docs/secure/security-guidance](https://auth0.com/docs/secure/security-guidance)
+
+And all the things nested in there (RFC’s, blog posts, etc.)
+
+> _Disclaimer_ - I am not a security expert by any means, feel free to contact me if I'm not precise at any point in this article.
+
+## A model way of doing authentication and authorization
+
+In an enterprise system, auth (AuthN + AuthZ) implementation is generally split into those four concerns:
+
+- **User self service** - actors should be able to authenticate manually through provided interfaces, and seamlessly update their identities
+- **Granular access control** - given an actor, an action, and its target (user → action → data/enitity). Can you rapidly answer yes/no to the “Can I do it” question?
+- **Global protection** - any action in the system should be suspect to access control, and ideally without the individual actors knowing about the process itself
+- **Access sharing** - if you allow it, other systems should be able to access your auth and use it to fulfil their actions
+
+Together, they compose an auth system. Doing things this way tends to make the moving parts independent and easily manageable. But as you will see, when you are starting small, you will simplify everything into a single app or even, a basic auth module.
+
+What I will now do is explain each of the concerns and show what to use to implement them for applications small and large.
+
+## User self service
+
+Your window to the auth world. We can populate our system with auth data automatically, yet at the end, you need to have humans or entities that act as users.
+
+> We group them together and give them **Identities**, which we recognise in our system as authenticated users
+
+Identity is something we approve, not them.
+
+> Therefore, actors make **Claims** that they actually have an identity that you recognise
+
+But those claims must be backed by something (like a passport in real world).
+
+> So they present you with their **Authenticators**. Which you check.
+
+Common authenticators?
+
+- Passwords
+- Tokens
+- TOTP (Time-based one-time passwords)
+- Passkeys - stored on your device and verified using WebAuthN process
+
+You define what authenticators you support. And you need to somehow handle them - to conduct logins, signups, password resets and so on.
+
+If it goes well, actors will be authenticated. Your usually also initiate a session by giving back a short lived session token, that they can show later to skip the whole process when trying to do things again. You also gain the bonus of associating additional data with a session.
+
+Session tokens are commonly stored in:
+
+- Bearer header
+- Cookies
+- URL parameters
+
+Formats may vary, but you have probably seen a JOSE (JWT, PASETO) token or a signed cookie somewhere.
+
+Other than that, your identities will be enriched with time. Additional metadata: emails, phone numbers, credit card numbers may be used in your auth processes, and they should be editable by their owners. So you need to have some kind of storage and interface to manage them too.
+
+A self service application will be responsible for the following concerns:
+
+- Providing UI screens for any kind of authentication and authorisation flows
+- Authentication flows and their verification
+- Issuing authentication tokens (and delivering them, by email, phone, etc.)
+- Interacting with other systems if you allow to authenticate and authorise actors using external systems
+
+Before you jump in, be sure to check on basics and good practices:
+
+- Verify users after signup (emails)
+- Provide two factor authentication for a bit of hardening
+- Password reset is a must
+- Critical actions should be verified again at time of execution
+- Password auth is a bit passe, but you can’t beat its simplicity
+
+[https://thecopenhagenbook.com]([https://thecopenhagenbook.com]
+
+You can implement user self service using a ready to use solution. For example:
+
+[https://www.ory.sh/kratos](https://www.ory.sh/kratos)
+
+## Granular access control
+
+The main piece for handling authorization. If there is data that needs to be shared between multiple identities, authentication is not enough. Access has to be restricted somehow. There are two main problems when implementing those restrictions:
+
+- Rules for allowing access can get complex, you need a good model to represent and check them
+- They should be attachable to every piece of data in your system
+- Checks should be performant and scalable, because the amount of relations between users and data grows exponentially with time (a cartesian product)
+
+> The most popular approach today is some form of **RBAC - Role Based Access Control**. It can also be extended to **Relation Based Access Control**.
+
+The mechanism goes as follows: define roles and relations between them. You can then check access like this:
+
+- **A** can do **X** on **B**
+- **B** can do **X** on **C**
+- **X** is transitive
+- Therefore **A** can do **X** on **C**
+
+> A service that provides the language for defining relations is called a **Policy Engine**
+
+If you start with a small/medium app, your “policy engine” is embedded in your app code itself. You may use a library for role management, or implement something simple by creating a database table with users id an their roles, which you then check in conditional blocks.
+
+**Most of the time you won’t need anything else!**
+
+However, for large systems, there are battle-tested solutions for you, for example **Open Policy Agent (OPA), AWS Cedar, and Google Zanzibar**
+
+Policy engines are not enough though. You need additional functionality such as reading roles from your access/session tokens or exposing access checks as API’s.
+
+> All of those things together create a complete **Permission System**
+
+Open source solutions are inspired by Google Zanzibar:
+
+[https://www.ory.sh/keto](https://www.ory.sh/keto)
+
+[https://openfga.dev](https://openfga.dev)
+
+## Global protection
+
+With time and growth, there are more products and data to protect in your system. You can start from logic in your applications, but it easy to miss something and leave it unprotected in the long run. Moreover, instead of application access, you may want to start restricting network traffic, physical access (offices) or even give power to your users, and let them create their own roles.
+
+This is when global protection comes in. You create a single access proxy which hooks up into your infrastructure and orchestrates every action in the system, authenticating or authorising access depending on its internal set of rules. Access verification itself may be delegated to your other services (like permission system or token check in the self service part).
+
+Let’s see an example. In a basic application, this is how a request is produced:
+
+**Client:**
+
+- Issues a request
+
+**Application:**
+
+- Receives request
+- Checks if it is authenticated
+- Handles the request
+- Produces response
+
+With a central access proxy some of the responsibility is handled in between:
+
+**Client:**
+
+- Issues request
+
+**Access proxy:**
+
+- Intercepts the request
+- Checks if it is authenticated
+- Is so, passes the request to application which:
+
+**Application:**
+
+- Receives request
+- Handles request
+- Produces response
+
+Benefits may not be apparent because you introduce a lot of complexity this way, but think about it. Now, you can add new applications to the system, and they can be protected instantly by your access control. There is no API calls to external service to authenticate requests, and no glue code. If you need custom checks, you register a policy inside the access proxy. For example:
+
+If request starts with `http://external.com` and targets `http://my-api.com`, authenticate user using bearer token and check its access to my-api using permission system.
+
+But the most important thing is the globality of this solution. Every resource comes under protection by default. You can protect more than just applications, every network call can use your auth system.
+
+It is crucial that your access proxy is really fast. This will require appropriate pairing with your infrastructure, for example API Gateway, so it may as well be an in-house solution. On the open source side:
+
+[https://www.ory.sh/oathkeeper](https://www.ory.sh/oathkeeper)
+
+## Access sharing
+
+We have talked about securing our own internals. Because sharing is caring, but more importantly, business is business, we need to have a secure way to exchange our own identity information with others. This is crucial to integrate with ever changing world of external services.
+
+Users want to log in with their favourite account, and you must provide it, securely. On the backend side of things, user federation is a thing too.
+
+> Today, the standard to do authorization safely, even across boundaries, is the famous **OAuth 2.0**
+
+> If you need an identity system on top of it, you want to use **OpenID Connect (OIDC)**
+
+We have talked about identity in a wider context, but the standard way to exchange personal data is through OIDC.
+
+If you just need to authenticate and authorise users through other providers, you just need a self service with correct connections. You authenticate outside of your system, and if everything goes right a provider sends your user back with a token, which you can verify and exchange for your own, used by your system.
+
+However, being the one who does the auth on behalf of others is a different kind of a beast. You will have to implement an authorization server which will talk in OAuth 2.0 and OIDC, while integrating with your own auth stack internally.
+
+Basically, someone asks you in Spanish (OAuth), you translate it to English, check in your dictionary (internal auth), and respond in Spanish again (convert your own identity into standard one).
+
+Believe me this is hard. Better to have a ready to use server, and glue it together. You can embed it in form of library, or host as a standalone product:
+
+[http://github.com/panva/node-oidc-provider](http://github.com/panva/node-oidc-provider)
+
+[https://www.ory.sh/hydra](https://www.ory.sh/hydra)
+
+## Summary
+
+So, you want to be able to serve your users, authorise effectively, protect globally, and share safely. Do it all, and you are golden.
+
+If you want to do everything in one package, see:
+
+[https://www.keycloak.org](https://www.keycloak.org)
+
+[https://github.com/zitadel/zitadel](https://github.com/zitadel/zitadel)
+
+Enjoy!
