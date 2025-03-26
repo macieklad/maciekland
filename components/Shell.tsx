@@ -13,7 +13,7 @@ export default function Shell(
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta charSet="UTF-8" />
-        <title>{title ?? "The land of Maciek"}</title>
+        <title>{title ?? "Maciej Ładoś"}</title>
         <meta
           name="description"
           content={description ??

@@ -1,6 +1,6 @@
 import Shell from "./Shell.tsx";
 import { Squiggle } from "./Squiggle.tsx";
-import posts from "../posts/database.json" assert { type: "json" };
+import posts from "../posts/database.json" with { type: "json" };
 import { dateHeader } from "../utils.ts";
 
 export default function Home() {
