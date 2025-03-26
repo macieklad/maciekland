@@ -36,39 +36,4 @@ export default defineConfig({
 });
 ```
 
-Now let's talk about DI. To make it worthwhile, you will need reflection. And esbuild does not support legacy decorators. So we will have to tweak this part first. Unfortunately we will have to replace esbuild altoghether (there were some attempts with plugins, but they didn't work out for me). But on the positive note, there is SWC today, and you can use it easily in your project with `vite-plugin-swc-transform` plugin. It is so simple, that if you want to do it yourself, just go and copy the code from the plugin repo directly.
-
-Your final vite config will look like this:
-
-```ts
-import { defineConfig } from "vite";
-import { vavite } from "vavite";
-import swc from "vite-plugin-swc-transform";
-
-export default defineConfig({
-  plugins: [
-    swc({
-      swcOptions: {
-        jsc: {
-          target: "es2022",
-          transform: {
-            legacyDecorator: true,
-            decoratorMetadata: true,
-            useDefineForClassFields: false,
-          },
-        },
-      },
-    }),
-    vavite({
-      handlerEntry: "/server.ts",
-      reloadOn: "static-deps-change",
-    }),
-  ],
-});
-```
-
-From here onward, we can do many cool things, for example create a fully typed `HttpContext` class, which you add fields to inside middleware and instantiate for each http request. With a DI layer, you can create controller classes that will be built and called for each request with the context, making them entirely independent from your server.
-
-I have created a complete working example with `@adonisjs/fold` that you can copy and try yourself, it should be easier than sticking more code listings together - [https://github.com/macieklad/vite-express-di-example](https://github.com/macieklad/vite-express-di-example). You can navigate to the `src/container.ts` and grok the things yourself from there (This is a holiday post, bare with barebones approach ;>). The `WeakMap` approach is inspired by [this article](https://thebigredgeek.medium.com/request-context-with-typescript-and-express-4b5d6d903caa).
-
 Enjoy!
