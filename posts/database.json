@@ -4,7 +4,7 @@
     "title": "Is NestJS a bad idea?",
     "description": "Here in Poland, many backend engineers have some experience with NestJS. It happens to a point that it affects the job market.\nI think it had its role, but no longer. I'm writing it down to remember why.",
     "publishedAt": "2025-03-26T00:00:00.000Z",
-    "readingTime": "8 min read"
+    "readingTime": "7 min read"
   },
   {
     "slug": "be-the-source-of-your-technical-decisions",
@@ -23,9 +23,9 @@
   {
     "slug": "barebones-http-server-with-vite-adonis-and-fold",
     "title": "Barebones http server with vite and express",
-    "description": "How to boost your express (or any other old server) with modern tooling and dependency injection support",
+    "description": "How to boost your express (or any other old server) with modern tooling without hassle",
     "publishedAt": "2024-02-15T00:00:00.000Z",
-    "readingTime": "4 min read"
+    "readingTime": "2 min read"
   },
   {
     "slug": "remix-api-handler-pattern",
