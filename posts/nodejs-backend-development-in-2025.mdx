@@ -1,0 +1,45 @@
+export const title = "NodeJS backend development in 2025";
+export const description = `Notes about feasibility of javascript for backend development, recommendations for picking frameworks, libraries and glueing everything together. With focus on node and a sprinkle of other runtimes.`;
+export const publishedAt = new Date("2025-02-17T00:00:00.000Z");
+
+## Introduction
+
+Javascript ecosystem is still a mess today. NodeJS, as almost everything notable in javascript land, came as a result of a unique mix of ideas, market and technological constraints ([highly recommended talk](https://www.destroyallsoftware.com/talks/the-birth-and-death-of-javascript)). After working with it for years, I still struggle to find good resources on how to build solid backends with it, they are either outdated or spit out someones personal opinion without any source. I want to share with you my experiences and recommendations, paired with sources, context and reasoning.
+
+We will start with a bit of context, that you can easily skip (go to the tldr; section then), and after that, dive into concrete recommendations - of frameworks, libraries and common patterns.
+
+## TLDR;
+
+## My take on javascript backend development in general
+ 
+After years of writing node code, I still don't think that we have a lot of clear winners in the framework and library land. This is especially true while looking at Laravel, Django and Rails being so mature and feature-rich. On the other hand, at least for me, no other language and its ecosystem gives me the same level of "good enough" feeling as javascript (with typescript) does:
+
+- it runs everywhere, and is fast enough for most use cases
+- has really flexible syntax
+- type system is one of a kind (from the basics like narrowing to libraries providing type safe SQL queries)
+- the community is huge and highly innovative, you can find a library for anything.
+- it constantly improves, evolves and adapts (with all of the quirks that come alongside)
+
+It's basic, but boy, does it run. I will try to explain both the good and bad parts of those points throughout the article. But in general, I think that you can create a really pleasant and productive environment for backend development with javascript, even more so than in other languages.
+
+Since NodeJS inception in 2011, so much have changed. We have options like deno and bun, javascript executes on many different engines, and runs across many providers. Still, if you want to use the ecosystem to its fullest, you will probably end up choosing NodeJS. Otherwise, you will shoot yourself in the foot - something will break (threads), won't work entirely (vitest), or you won't be able to integrate with your company stack because a library is missing (in 2025). That is the reality if you are not developing only for yourself or a small team. So I will focus on node in this article, and leave deno and bun for another time.
+
+## Few words about the author
+
+I've first encountered node around the time when [browserify](https://en.wikipedia.org/wiki/Browserify) was a thing. I can't say that I've created a lot of big, successful projects, but since the beginning of my journey:
+
+- I started with PHP and still love it today, albeit this love is named Laravel. I have worked with it for years, about 3 professionally.
+- I also worked a time or two with Django, Rails, and raw Go servers
+
+But for most of my career, node never left me:
+
+- I made a few apps with angular 1, react and vue, dabbled with svelte and friends
+- Most of my frontend journey was spent with CRA, Remix and Next
+- I wrote small projects with AdonisJS and Nest, larger on express and fastify, experimented with Nitro, Elysia and Hono
+- Currently I maintain the javascript ecosystem at my company (around 100 developers), where our most used javascript backend serves around a million requests daily (other backends are in Ruby and Go)
+
+## Criteria for picking a backend tooklit
+
+## Frameworks and libraries
+
+## Recommendations
