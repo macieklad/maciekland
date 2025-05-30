@@ -2,7 +2,7 @@
   {
     "slug": "living-without-conflict",
     "title": "Living without conflict",
-    "description": "I think that a positive approach to life is the right one. For me it's a fact that we, as humanity, forgot, or maybe didn't fully discover. Here is my approach to life.",
+    "description": "What does it mean? Let's dive in.",
     "publishedAt": "2025-05-01T00:00:00.000Z",
     "readingTime": "8 min read"
   },
@@ -12,13 +12,6 @@
     "description": "Here in Poland, many backend engineers have some experience with NestJS. It happens to a point that it affects the job market.\nI think it had its role, but no longer. I'm writing it down to remember why.",
     "publishedAt": "2025-03-26T00:00:00.000Z",
     "readingTime": "7 min read"
-  },
-  {
-    "slug": "nodejs-backend-development-in-2025",
-    "title": "NodeJS backend development in 2025",
-    "description": "Notes about feasibility of javascript for backend development, recommendations for picking frameworks, libraries and glueing everything together. With focus on node and a sprinkle of other runtimes.",
-    "publishedAt": "2025-02-17T00:00:00.000Z",
-    "readingTime": "3 min read"
   },
   {
     "slug": "be-the-source-of-your-technical-decisions",

@@ -1,51 +1,50 @@
 export const title = "Is NestJS a bad idea?";
-export const description = `Here in Poland, many backend engineers have some experience with NestJS. It happens to a point that it affects the job market.
-I think it had its role, but no longer. I'm writing it down to remember why.`;
+export const description = `Here in Poland, many backend engineers have NestJS experience, to a level that it can even affect hiring focus.
+I think that Nest played its role, but is not needed anymore. I'm writing it down to remember why.`;
 export const publishedAt = new Date("2025-03-26T00:00:00.000Z");
 
 ## Son, we have a module system at home
-Nest comes with its own module system. And that's the point in itself against it. Javascript organizes code into modules
-natively right now, and with Nest you are adding another layer of indirection upon it, just to solve the same problem.
-Because the framework leverages it so heavily, everything else is built around that, and those bad decisions cascade.
 
-Let's start with a trivial example - we will have a controller for handling http requests, some kind of container that
-will isolate business logic ("service" word not used intentionally), and a thing that wires them together. All of them are
+Nest has its own module system. And that's the point in itself against it. Modern JS natively organizes code into modules, and with Nest you are adding another layer of indirection upon it to solve the same problem.
+Because the framework leverages its own module system heavily, that abstraction cascades.
+
+Let's show it with a simple example - we will have a controller for handling http requests, a code container that
+will isolate business logic ("service" not used intentionally), and a thing that wires them together. All of them are
 singletons so not much magic will happen.
 
 ```ts
-// Examples mostly from nest docs
+// Examples taken from nest docs
 // cats.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class CatsService {
   findAll(): string {
-    return ['a cat'];
+    return ["a cat"];
   }
 }
-
 ```
 
 ```ts
 // cats.controller.ts
-import { Controller, Get } from '@nestjs/common';
-import { CatsService } from './cats.service';
+import { Controller, Get } from "@nestjs/common";
+import { CatsService } from "./cats.service";
 
-@Controller('cats')
+@Controller("cats")
 export class CatsController {
   constructor(private readonly catsService: CatsService) {}
 
   @Get()
   listCats(): string {
-    return  this.catsService.findAll();
+    return this.catsService.findAll();
   }
 }
 ```
 
 ```ts
-import { Module } from '@nestjs/common';
-import { CatsController } from './cats.controller';
-import { CatsService } from './cats.service';
+import { Module } from "@nestjs/common";
+import { CatsController } from "./cats.controller";
+import { CatsService } from "./cats.service";
 
 @Module({
   controllers: [CatsController],
@@ -56,151 +55,147 @@ export class CatsModule {
 }
 ```
 
-You would say, a normal thing, aye? But the thing is it could as well be:
+You would say, a normal thing, aye? But it could as well be just:
+
 ```ts
 // cats.ts
 export function findAll(): string {
-  return ['a cat'];
+  return ["a cat"];
 }
 ```
 
 and then in some kind of `routes.ts` file:
-```ts
-import * as cats from './cats';
-import { app } from 'your-framework-or-http-module';
 
-app.get('/cats', () => {
-    return cats.findAll();
+```ts
+import * as cats from "./cats";
+import { app } from "your-framework-or-http-module";
+
+app.get("/cats", () => {
+  return cats.findAll();
 });
 ```
 
 Even this abstract and not really useful example should beget a question - why something so basic as a one-liner
-grows into a configuration mess? Unnecessary complexity comes as an answer, but we will spend a bit more time on it.
-Before giving a judgment, I will instead give you some features from Nest, and how you solve them with JustJavascriptTM.
+grows into a configuration mess when using Nest? Unnecessary complexity is the answer, but we will spend a bit more time to prove the point. Instead of writing a lot of arguments, I will instead show you features from Nest, and how you can implement them with JustJavascriptTM.
 
 ### Inversion of control
 
-
-
-First, most people want dependency injection to help them with testing. This is solved by default in every testing tool today.
-You import a module, mock what you need per test, no need for a framework to do it for you. When Nest originated,
-it was a different time, JS module system was a mess, but today it's not, enjoy.
+First, everyone want dependency injection to help them with testing. This is solved by default in every testing tool today.
+You import a module and mock what you need per test. No need for a framework to do it for you. When Nest was starting out,
+it was a different time, JS module system was a mess, but today it's not.
 
 ```ts
-import * as cats from './cats';
-import { vi, describe, it, expect } from 'vitest';
+import * as cats from "./cats";
+import { vi, describe, it, expect } from "vitest";
 
-describe('custom cats', () => {
-    vi.mock(cats, 'findAll', () => ['a custom cat']);
+describe("custom cats", () => {
+  vi.mock(cats, "findAll", () => ["a custom cat"]);
 
-    it('should return a custom cat', () => {
-        expect(cats.findAll()).toEqual(['a custom cat']);
-    });
+  it("should return a custom cat", () => {
+    expect(cats.findAll()).toEqual(["a custom cat"]);
+  });
 });
 ```
 
-Next, there may come some time in your life when you will need to create some kind of pluggable abstraction for your
-code, for example, you want to save data, write it to storage, and be able to switch between local and cloud storage.
-With how powerful Typescript has become, it is a breeze to just work with interfaces and generics.
+Next, there may come a time in your life when you will have to create some kind of pluggable abstraction for your
+code. For example, you want to save some data, which will be stored in different places. You want to be able to swap storage implementations without refactoring your code, and hide the hassle of configuration from the developers who aren't responsible for this part of the project. With how powerful Typescript has become, it is a breeze to just work with interfaces and generics.
 
-Typescript has super powerful inference primitives. Speaking directly, you can replace heavy wiring systems with a more
-functional approach, while still getting your autocomplete and guarantees that what you send is what you get.
+Typescript has super powerful inference primitives. Speaking plainly, you can replace heavy wiring systems with a more
+functional approach, while still making sure that nothing will change without you knowing about it.
 
 ```ts
 type DataStorage = {
-    write: (data: string) => void;
-    load: () => string;
-}
+  write: (data: string) => void;
+  load: () => string;
+};
 
-function createStorage<Storages extends Record<string, DataStorage>>(storages: Storages) {
-    return {
-        use(name: keyof Storages): DataStorage {
-            return storages[name];
-        }
-    }
+function createStorage<Storages extends Record<string, DataStorage>>(
+  storages: Storages
+) {
+  return {
+    use(name: keyof Storages): DataStorage {
+      return storages[name];
+    },
+  };
 }
 
 const storages = createStorage({
-    local: {
-        write: (data: string) => console.log('local', data),
-        load: () => 'local'
-    },
-    cloud: {
-        write: (data: string) => console.log('cloud', data),
-        load: () => 'cloud'
-    }
-})
+  local: {
+    write: (data: string) => console.log("local", data),
+    load: () => "local",
+  },
+  cloud: {
+    write: (data: string) => console.log("cloud", data),
+    load: () => "cloud",
+  },
+});
 
 // Voila! Your 'use' will only take `local` or `cloud` as an argument
-storages.use('local').write("Data!");
+storages.use("local").write("Data!");
 ```
 
 Then, complicated IoC is achieved with more builder functions:
 
 ```js
 createStorage({
-    s3: createS3Adapter(),
-})
+  s3: createS3Adapter(),
+});
 ```
 
-And so it goes. You can easily compose things even in large codebases, because Typescript will make sure that nobody
-passes anything stupid or changes some keys without affecting other parts of the code. This method is also more explicit,
-and you can navigate the codebase directly without checking how runtime resolves your dependencies.
+And so it goes. You can easily compose things this way even in large codebases. Typescript will make sure that nobody
+passes anything that breaks the contract without compilation errors. This method more explicit than Nest's IoC, because you can simply navigate the codebase through symbols, without checking how runtime resolves the dependencies.
 
-Finally, at some point you may be met with technical issues. Circular dependencies or code ownership problems are two
-things that come to mind. This again, shouldn't be solved with a runtime. ESLint has a plugin that forbids circular dependencies.
-For the second problem, you can start with CODEOWNERS or look into more sophisticated tools.
-
+Final addition. At some point you may be met with usability issues when doing DI by yourself. Circular dependencies or code ownership problems are two things that come to mind. This again, shouldn't be solved with a runtime. ESLint has a plugin that forbids circular dependencies. For the second problem, you can start with CODEOWNERS or look into more sophisticated tools.
 
 ### Scoping
+
 Sometimes you need to reuse a piece of code for each request or workflow, which is dependent on your input data.
-Nest gives you injection scopes, javascript gives you functions. If you don't have any magic, which we removed above,
+Nest gives you injection scopes, javascript gives you functions. Without magic, which we removed above,
 you can just pass the data to your function from the request.
 
-It's not always the best solution, but should be the default one. If you need to decouple things more, you want context
-passing. `AsyncLocalStorage` is your friend. Nest also uses it under the hood, so just skip the framework part.
+It's not always the best solution, but should be the default one. If you need to decouple things further, or make them more ergonomic, `AsyncLocalStorage` is for you. Nest also uses it under the hood, so just skip the framework part.
 
 ```ts
-import { AsyncLocalStorage } from 'async_hooks';
+import { AsyncLocalStorage } from "async_hooks";
 
 const requestIdStorage = new AsyncLocalStorage();
 
 function logRequestId() {
-    console.log(requestIdStorage.getStore().requestId);
+  console.log(requestIdStorage.getStore().requestId);
 }
 
-
 app.use((req, res, next) => {
-    requestIdStorage.run({ requestId: req.headers['request-id'] }, () => {
-        next();
-    });
+  requestIdStorage.run({ requestId: req.headers["request-id"] }, () => {
+    next();
+  });
 });
 
+app.get("/cats", () => {
+  logRequestId();
 
-app.get('/cats', () => {
-    logRequestId();
-
-    return cats.findAll();
+  return cats.findAll();
 });
 ```
 
 ### Lazy loading
-When we use plain modules, you can resolve them lazily with native `imports`
-```ts
-app.get('/cats', async () => {
-    const cats = await import('./cats');
 
-    return cats.findAll();
+When we use plain modules, you can resolve them lazily with native `imports`
+
+```ts
+app.get("/cats", async () => {
+  const cats = await import("./cats");
+
+  return cats.findAll();
 });
 ```
 
-If modules needs to have input, you can export a builder to configure it first, and this will look like:
+If modules need to have input, you can export a builder to configure them first. This will look like:
 
 ```ts
-app.get('/cats', async () => {
-    const { createCatsFinder } = await import('./cats');
-    const cats = createCatsFinder({ color: "orange" });
-    return cats.findAll();
+app.get("/cats", async () => {
+  const { createCatsFinder } = await import("./cats");
+  const cats = createCatsFinder({ color: "orange" });
+  return cats.findAll();
 });
 ```
 
@@ -208,37 +203,30 @@ At this point I hope you can see that Nest just gives you a sledgehammer to crac
 it's that you shouldn't. [Every abstraction has costs](https://www.tedinski.com/2018/01/30/the-one-ring-problem-abstraction-and-power.html).
 
 ## It gets worse
-Making Java out of JavaScript is what's happening here, and it's not nice. Abstraction is one thing, but fitting
-a square peg into a round hole is another. If you inspect things closer, you will start seeing more. For example,
-decorators.
+
+Making Java out of JavaScript is what's happening here, and it's not nice. If you inspect things closer, you will
+start seeing more. Decorators, for example, come to mind.
 
 I was using "module system" instead of "dependency injection system" on purpose. Nest tries to do it, but it's just
-not possible without hacks. We don't have a good reflection system in JavaScript, period. So you go into the rabbit
+not possible without hacks. We don't have a good reflection primitives in JavaScript, period. So you go into the rabbit
 hole of `experimentalDecorators` and `emitDecoratorMetadata`. You will start losing type safety here and there.
-People will start to crete some weird patterns to make it work. At some point, everyone feel that something is off.
+Then people start to crete some weird patterns to make it work. At some point, everyone feels that something is off.
 
 The tower of babel grows, and you fall with it. Drown in boilerplate, there comes a time when something breaks,
-or becomes unmaintainable, and you will discuss that the idea was sound, but people didn't follow the best practices.
+or becomes unmaintainable. You will discuss that the idea was sound, but people didn't follow the best practices.
 This may even be turned into an argument for the framework, because at least it will prevent most footguns. But it
-was the framework that created them in the first place, because it tried to work in a way that isn't suited for the
+was the framework that created them in the first place, as it tried to work in a way that isn't suited for the
 language it was written in.
 
 Nest modules were probably inspired by Angular, seeing their syntax and reading references in the documentation.
 It was made for an era where JavaScript was a total no-standard zone. But it's not the case anymore. We have good
-tools, great libraries, and ok-ish runtimes. We can remove one peel from the onion and have something fresh.
+tools, great libraries, and ok-ish runtimes. We can remove one layer from the onion and live without it.
 
 ## It was turtles all the way down
-Bear with me and the onion metaphor for the last moment. After seeing Nest biggest pitfall - its module system,
-and removing it out of the equation, you will start seeing that it glues together a huge amount of other libraries.
-You may like it or not, but I encourage you to see what's under the hood. Because for me, it doesn't take more
-than a day or two to configure them all by hand. For your company, you will probably do it once, and learn a lot
+
+Bear with me and the onion metaphor just for one more minute. After seeing Nest biggest pitfall - its module system,
+and removing it out of the equation, you will start seeing that it glues together a huge amount of other libraries. For me, it doesn't take more than a day or two to configure them all by hand. For your company, you will probably do it once, and learn a lot
 in the process.
 
-I suggest it, because we really powerful libraries in JavaScript ecosystem, and maintainers make a lot of effort
-to make them work together. Also, built-in runtime modules are really great! It's not like in the PHP or Ruby world,
-where when you don't use a framework, you basically lose a standard library and a whole ecosystem that is made to work
-with them.
-
-I'm a fan of a well-designed frameworks and abstractions, but if you can replace them without losing much,
-I just think it's not a case here. Nest has a huge ecosystem and a lot of users, I see the allure. I also wonder
-if there would be a need for so many solutions, if the root problem was solved in the first place.
+I'm a fan of a well-designed frameworks and abstractions, but if you can replace them today without losing much,
+what is the reason to pick them in the first place?

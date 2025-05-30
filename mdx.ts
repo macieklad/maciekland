@@ -11,14 +11,11 @@ declare module "react/jsx-runtime" {
 }
 
 export async function evaluate(mdxFile: string) {
-  const file = await compile(
-    await Deno.readTextFile(mdxFile),
-    {
-      rehypePlugins: [rehypePrism],
-      remarkPlugins: [readingTime, readingMdxTime],
-      outputFormat: "function-body",
-    },
-  );
+  const file = await compile(await Deno.readTextFile(mdxFile), {
+    rehypePlugins: [rehypePrism],
+    remarkPlugins: [readingTime, readingMdxTime],
+    outputFormat: "function-body",
+  });
 
   const { default: Content, ...frontMatter } = await run(file, {
     Fragment,
@@ -57,7 +54,7 @@ export async function writePostDatabase() {
     .map((entry) => entry.name);
 
   const contents = await Promise.all(
-    postFiles.map((post) => evaluate(`./posts/${post}`)),
+    postFiles.map((post) => evaluate(`./posts/${post}`))
   );
 
   let database = [];
@@ -77,8 +74,12 @@ export async function writePostDatabase() {
 
     if (!publishedAt) {
       throw new Error(
-        `Post ${postSlug} does not have publication datte defined`,
+        `Post ${postSlug} does not have publication datte defined`
       );
+    }
+
+    if (publishedAt instanceof Date && publishedAt.getTime() > Date.now()) {
+      continue;
     }
 
     database.push({
@@ -90,11 +91,12 @@ export async function writePostDatabase() {
     });
   }
 
-  database = database
-    .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+  database = database.sort(
+    (a, b) => b.publishedAt.getTime() - a.publishedAt.getTime()
+  );
 
   await Deno.writeTextFile(
     "./posts/database.json",
-    JSON.stringify(database, null, 2),
+    JSON.stringify(database, null, 2)
   );
 }
